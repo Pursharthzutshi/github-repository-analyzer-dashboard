@@ -1,0 +1,38 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.navbar {
+    flex: 0 0 10vh;
+    box-shadow: 2px 2px 2px 2px whitesmoke;
+    z-index: 10; /* keep it above everything else */
+}
+
+.content-wrapper {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.left-sidebar {
+    flex: 0 0 8%;
+    box-shadow: 2px 2px 2px 2px whitesmoke;
+    z-index: 5;
+}
+
+.main-content {
+    flex: 1;
+    overflow-y: auto; /* allows scrolling only in the main content area */
+    padding: 1.5rem;
+    background-color: #fafafa;
+}

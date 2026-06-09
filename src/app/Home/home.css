@@ -1,0 +1,35 @@
+.home{
+    display: flex;
+    flex-direction: column;
+    gap:20px;
+}
+
+.home-page-box-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch; 
+    flex-wrap: wrap;
+    gap: 20px; 
+    width: 100%;
+}
+
+.box-wrapper {
+    min-width: 250px; 
+    display: flex;
+}
+
+.home-page-box {
+    width: 100%;
+    min-height: 25vh;
+    background-color: white;
+    border-radius: 12px; 
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    box-sizing: border-box;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
+}
+
+.repo-analysis-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
