@@ -12,7 +12,7 @@ export default async function githubRepoAnalysis(prevState: any, formData: FormD
         arguments: {
             githubRepoUrl
         }
-       })
+       }, undefined, { timeout: 120000 }) // Pass undefined for resultSchema to use the default, and options as 3rd arg
 
        return {
         state:"Success",
