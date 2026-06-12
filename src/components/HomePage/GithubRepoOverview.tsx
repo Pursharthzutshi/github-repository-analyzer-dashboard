@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
+
 export default function GithubRepoOverview({ state }) {
 
     const [githubRepoData, setGithubRepoData] = useState(null)
@@ -14,7 +15,7 @@ export default function GithubRepoOverview({ state }) {
 
     return (
         <div className="github-repo-overview">
-            <Markdown>{githubRepoData?.content?.[0]?.text}</Markdown>
+            <Markdown>{githubRepoData?.readme}</Markdown>
         </div>
     )
 }

@@ -1,13 +1,12 @@
 import { openrouter } from "../lib/openrouter/openrouter";
-import { CallGithubRepo } from "./call-github-repo";
 
-export default async function AIprompt(githubRepoUrl: string, readme: string, systemPrompt: string) {
-
-    const { repoData, owner, repo, defaultBranch } = await CallGithubRepo(githubRepoUrl);
+export default async function AIprompt(repoData: any, owner: string, repo: string, fileContent: string, systemPrompt: string) {
 
     const combinedData = `
     Repository Name: ${repoData.name}
-    Repository README: ${readme}
+    Content to Analyze:
+    ${fileContent}
+    
     Owner: ${owner}
     Repo: ${repo}    
     `;
@@ -17,11 +16,5 @@ export default async function AIprompt(githubRepoUrl: string, readme: string, sy
         { role: "user", content: combinedData },
     ]);
 
-    return {
-        aiResponse,
-        owner,
-        repo,
-        defaultBranch
-    }
-
+    return aiResponse;
 }

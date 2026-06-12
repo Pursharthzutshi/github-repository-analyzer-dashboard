@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
 import { z } from "zod"
 import AIprompt from "./ai-prompt";
+import { CallGithubRepo } from "./call-github-repo";
 
 export const server = new McpServer({
     name: "github-repo-analyzer-dashboard",
@@ -21,13 +22,12 @@ server.resource("all-analysis", "analysis://all", async (uri) => {
     }
 })
 
-server.tool("analyze-github-repo-package-json", "analyze the github repo readme", {
+server.tool("analyze-github-repo-package-json", "analyze the github repo package json", {
     githubRepoUrl: z.string()
 }, async ({ githubRepoUrl }) => {
-    const systemPrompt = "You are a Senior Software Engineer. Analyze the repository in deep technical detail. Return the tree stucture of repo"
-    let packageJSON = "";
-    const { aiResponse, owner, repo } = await AIprompt(githubRepoUrl, packageJSON, systemPrompt)
+    const { repoData, owner, repo } = await CallGithubRepo(githubRepoUrl);
 
+    let packageJSON = "";
     try {
         const pkgRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/package.json`, {
             headers: { "Accept": "application/vnd.github.raw" }
@@ -36,6 +36,9 @@ server.tool("analyze-github-repo-package-json", "analyze the github repo readme"
             packageJSON = await pkgRes.text();
         }
     } catch (e) { console.error("Error fetching package.json", e); }
+
+    const systemPrompt = "You are a Senior Software Engineer. Analyze the repository in deep technical detail. Return the package json analysis of repo";
+    const aiResponse = await AIprompt(repoData, owner, repo, packageJSON, systemPrompt);
 
     return {
         content: [
@@ -46,12 +49,12 @@ server.tool("analyze-github-repo-package-json", "analyze the github repo readme"
     }
 })
 
-server.tool("analyze-github-repo-tree", "analyze the github repo readme", {
+server.tool("analyze-github-repo-tree", "analyze the github repo tree", {
     githubRepoUrl: z.string()
 }, async ({ githubRepoUrl }) => {
-    const systemPrompt = "You are a Senior Software Engineer. Analyze the repository in deep technical detail. Return the tree stucture of repo"
+    const { repoData, owner, repo, defaultBranch } = await CallGithubRepo(githubRepoUrl);
+
     let fileTree = "";
-    const { aiResponse, owner, repo, defaultBranch } = await AIprompt(githubRepoUrl, fileTree, systemPrompt)
     try {
         const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${defaultBranch}?recursive=1`);
         if (treeRes.ok) {
@@ -61,6 +64,9 @@ server.tool("analyze-github-repo-tree", "analyze the github repo readme", {
             }
         }
     } catch (e) { console.error("Error fetching tree", e); }
+
+    const systemPrompt = "You are a Senior Software Engineer. Analyze the repository in deep technical detail. Return the tree stucture of repo";
+    const aiResponse = await AIprompt(repoData, owner, repo, fileTree, systemPrompt);
 
     return {
         content: [
@@ -75,10 +81,9 @@ server.tool("analyze-github-repo-tree", "analyze the github repo readme", {
 server.tool("analyze-github-repo-readme", "analyze the github repo and return insights", {
     githubRepoUrl: z.string()
 }, async ({ githubRepoUrl }) => {
-    let readme = "";
-    const systemPrompt = "You are a Senior Software Engineer. Analyze the repository in deep technical detail. Return ONLY a valid Markdown: Name, README, Owner. Here Readme should be the analysis about the repo"
-    const { aiResponse, owner, repo } = await AIprompt(githubRepoUrl, readme, systemPrompt)
+    const { repoData, owner, repo } = await CallGithubRepo(githubRepoUrl);
 
+    let readme = "";
     try {
         const readmeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`, {
             headers: { "Accept": "application/vnd.github.raw" }
@@ -89,6 +94,8 @@ server.tool("analyze-github-repo-readme", "analyze the github repo and return in
         }
     } catch (e) { console.error("Error fetching readme", e); }
 
+    const systemPrompt = "You are a Senior Software Engineer. Analyze the repository in deep technical detail. Return ONLY a valid Markdown: Name, README, Owner. Here Readme should be the analysis about the repo";
+    const aiResponse = await AIprompt(repoData, owner, repo, readme, systemPrompt);
 
     return {
         content: [

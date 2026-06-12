@@ -7,21 +7,21 @@ export default async function githubRepoAnalysis(prevState: any, formData: FormD
 
         const client = await ConnectMCP()
 
-        const analyzeGithubRepoReadmeAnalysis = await client.callTool({
+        const analyzeGithubRepoReadmeAnalysis = client.callTool({
             name: "analyze-github-repo-readme",
             arguments: {
                 githubRepoUrl
             }
         }, undefined, { timeout: 120000 })
 
-        const analyzeGithubRepoTreeAnalysis = await client.callTool({
+        const analyzeGithubRepoTreeAnalysis = client.callTool({
             name: "analyze-github-repo-tree",
             arguments: {
                 githubRepoUrl
             }
         }, undefined, { timeout: 120000 })
 
-        const analyzeGithubRepoPackageJSONAnalysis = await client.callTool({
+        const analyzeGithubRepoPackageJSONAnalysis = client.callTool({
             name: "analyze-github-repo-package-json",
             arguments: {
                 githubRepoUrl
@@ -35,10 +35,17 @@ export default async function githubRepoAnalysis(prevState: any, formData: FormD
 
         console.log(result)
 
+        // Parse the nested MCP responses into a clean object
+        const parsedAnalysis = {
+            readme: result[0]?.content?.[0]?.text || "",
+            tree: result[1]?.content?.[0]?.text || "",
+            packageJson: result[2]?.content?.[0]?.text || ""
+        };
+
         const dataToSave = {
             state: "Success",
             message: "Loaded from local mock DB",
-            data: JSON.stringify(result),
+            data: JSON.stringify(parsedAnalysis),
             timestamp: Date.now()
         };
         localStorage.setItem("latest_github_analysis", JSON.stringify(dataToSave));
@@ -46,7 +53,7 @@ export default async function githubRepoAnalysis(prevState: any, formData: FormD
         return {
             state: "Success",
             message: "Github Repo Analyzed",
-            data: JSON.stringify(result)
+            data: JSON.stringify(parsedAnalysis)
         };
     } catch (error) {
         console.error("Analysis Error:", error);

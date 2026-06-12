@@ -52,7 +52,7 @@ export default function Home() {
 
                 <BoxWrapper flex={2}>
                     <div className="home-page-box">
-                        <FileExplorer />
+                        <FileExplorer state={displayState} />
                     </div>
                 </BoxWrapper>
 
@@ -74,7 +74,7 @@ export default function Home() {
 
                 <BoxWrapper flex={1}>
                     <div className="home-page-box">
-                        <RepositoryInsights />
+                        <RepositoryInsights state={displayState} />
                     </div>
                 </BoxWrapper>
 
