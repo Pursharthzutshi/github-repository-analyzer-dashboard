@@ -7,12 +7,33 @@ export default async function githubRepoAnalysis(prevState: any, formData: FormD
 
         const client = await ConnectMCP()
 
-        const result = await client.callTool({
+        const analyzeGithubRepoReadmeAnalysis = await client.callTool({
             name: "analyze-github-repo-readme",
             arguments: {
                 githubRepoUrl
             }
         }, undefined, { timeout: 120000 })
+
+        const analyzeGithubRepoTreeAnalysis = await client.callTool({
+            name: "analyze-github-repo-tree",
+            arguments: {
+                githubRepoUrl
+            }
+        }, undefined, { timeout: 120000 })
+
+        const analyzeGithubRepoPackageJSONAnalysis = await client.callTool({
+            name: "analyze-github-repo-package-json",
+            arguments: {
+                githubRepoUrl
+            }
+        }, undefined, { timeout: 120000 })
+
+
+        const result = await Promise.all([analyzeGithubRepoReadmeAnalysis, analyzeGithubRepoTreeAnalysis, analyzeGithubRepoPackageJSONAnalysis]).then((values) => {
+            return values
+        })
+
+        console.log(result)
 
         const dataToSave = {
             state: "Success",
