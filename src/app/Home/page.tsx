@@ -1,4 +1,4 @@
-import { useActionState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import AnalyzeSearchInput from "../../components/AnalyzeSearchInput"
 import FileExplorer from "../../components/HomePage/FileExplorer"
 import GithubRepoOverview from "../../components/HomePage/GithubRepoOverview"
@@ -7,8 +7,8 @@ import RecentQuestions from "../../components/HomePage/RecentQuestions"
 import RepositoryInsights from "../../components/HomePage/RepositoryInsights"
 import SemanticSearch from "../../components/HomePage/SemanticSearch"
 import BoxWrapper from "./box-wrapper"
+import githubRepoAnalysis, { getLatestAnalysis } from "../(actions)/github-analysis"
 import "./home.css"
-import githubRepoAnalysis from "../(actions)/github-analysis"
 
 export default function Home() {
 
@@ -19,15 +19,32 @@ export default function Home() {
     }
 
     const [state, formAction] = useActionState(githubRepoAnalysis, initialState)
+    const [displayState, setDisplayState] = useState(initialState)
+
+    useEffect(() => {
+        async function fetchLatest() {
+            const latest = await getLatestAnalysis();
+            if (latest) {
+                setDisplayState(latest);
+            }
+        }
+        fetchLatest();
+    }, []);
+
+    useEffect(() => {
+        if (state && state.data) {
+            setDisplayState(state);
+        }
+    }, [state]);
 
     return (
         <div className="home">
 
-            <AnalyzeSearchInput state={state} formAction={formAction} />
+            <AnalyzeSearchInput state={displayState} formAction={formAction} />
 
             <BoxWrapper flex={2}>
                 <div className="home-page-box">
-                    <GithubRepoOverview state={state} />
+                    <GithubRepoOverview state={displayState} />
                 </div>
             </BoxWrapper>
 
