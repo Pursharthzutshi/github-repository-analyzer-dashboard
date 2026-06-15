@@ -1,26 +1,17 @@
 import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
+import useGithubRepoDataHook from "./useGithubRepoDataHook";
 
 export default function RepositoryInsights({ state }: { state?: any }) {
-    const [insightsData, setInsightsData] = useState<any>(null)
-
-    useEffect(() => {
-        if (state?.data) {
-            try {
-                const parsed = JSON.parse(state.data);
-                setInsightsData(parsed);
-            } catch (e) {
-                console.error("Failed to parse data in RepositoryInsights", e);
-            }
-        }
-    }, [state])
+    const githubRepoData = useGithubRepoDataHook(state);
 
     return (
         <div className="repository-insights">
-            {insightsData?.packageJson ? (
-                <Markdown>{insightsData.packageJson}</Markdown>
+            <h3>Insights</h3>
+            {githubRepoData?.insights ? (
+                <Markdown>{githubRepoData.insights}</Markdown>
             ) : (
-                <p>No repository insights data yet.</p>
+                <p>No github repo data yet.</p>
             )}
         </div>
     )

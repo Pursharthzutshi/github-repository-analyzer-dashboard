@@ -1,19 +1,8 @@
-import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
+import useGithubRepoDataHook from "./useGithubRepoDataHook";
 
 export default function FileExplorer({ state }: { state?: any }) {
-    const [fileTreeData, setFileTreeData] = useState<any>(null)
-
-    useEffect(() => {
-        if (state?.data) {
-            try {
-                const parsed = JSON.parse(state.data);
-                setFileTreeData(parsed);
-            } catch (e) {
-                console.error("Failed to parse data in FileExplorer", e);
-            }
-        }
-    }, [state])
+    const fileTreeData = useGithubRepoDataHook(state);
 
     return (
         <div className="file-explorer">
@@ -25,4 +14,3 @@ export default function FileExplorer({ state }: { state?: any }) {
         </div>
     )
 }
-

@@ -1,22 +1,16 @@
-import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
+import useGithubRepoDataHook from "./useGithubRepoDataHook";
 
-export default function GithubRepoOverview({ state }) {
-
-    const [githubRepoData, setGithubRepoData] = useState(null)
-
-    useEffect(() => {
-        if (state.data) {
-            console.log("Parsed Data:", setGithubRepoData(JSON.parse(state.data)));
-        } else {
-            console.log("State:", state);
-        }
-    }, [state])
+export default function GithubRepoOverview({ state }: { state?: any }) {
+    const githubRepoData = useGithubRepoDataHook(state);
 
     return (
         <div className="github-repo-overview">
-            <Markdown>{githubRepoData?.readme}</Markdown>
+            {githubRepoData?.readme ? (
+                <Markdown>{githubRepoData.readme}</Markdown>
+            ) : (
+                <p>No github repo data yet.</p>
+            )}
         </div>
     )
 }
-

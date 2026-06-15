@@ -78,3 +78,31 @@
     position: relative;
     z-index: 2;
 }
+
+.tech-stack {
+    animation: fadeIn 0.5s ease-out forwards;
+    position: relative;
+    z-index: 2;
+}
+
+.tech-stack-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 1rem 0;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+
+.tech-stack-content {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.tech-stack-empty {
+    font-size: 0.85rem;
+    color: var(--text-muted, #666);
+    font-style: italic;
+}

@@ -28,10 +28,27 @@ export default async function githubRepoAnalysis(prevState: any, formData: FormD
             }
         }, undefined, { timeout: 120000 })
 
+        const analyzeGithubRepoInsights = client.callTool({
+            name: "analyze-github-repo-insights",
+            arguments: {
+                githubRepoUrl
+            }
+        }, undefined, { timeout: 120000 })
 
-        const result = await Promise.all([analyzeGithubRepoReadmeAnalysis, analyzeGithubRepoTreeAnalysis, analyzeGithubRepoPackageJSONAnalysis]).then((values) => {
-            return values
-        })
+        const analyzeGithubRepoLanguages = client.callTool({
+            name: "analyze-github-repo-languages",
+            arguments: {
+                githubRepoUrl
+            }
+        }, undefined, { timeout: 120000 })
+
+        const result = await Promise.all([
+            analyzeGithubRepoReadmeAnalysis,
+            analyzeGithubRepoTreeAnalysis,
+            analyzeGithubRepoPackageJSONAnalysis,
+            analyzeGithubRepoInsights,
+            analyzeGithubRepoLanguages
+        ])
 
         console.log(result)
 
@@ -39,7 +56,9 @@ export default async function githubRepoAnalysis(prevState: any, formData: FormD
         const parsedAnalysis = {
             readme: result[0]?.content?.[0]?.text || "",
             tree: result[1]?.content?.[0]?.text || "",
-            packageJson: result[2]?.content?.[0]?.text || ""
+            packageJson: result[2]?.content?.[0]?.text || "",
+            insights: result[3]?.content?.[0]?.text || "",
+            languages: result[4]?.content?.[0]?.text || ""
         };
 
         const dataToSave = {

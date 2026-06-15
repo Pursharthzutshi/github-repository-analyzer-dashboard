@@ -4,9 +4,7 @@ export default async function AIprompt(repoData: any, owner: string, repo: strin
 
     const combinedData = `
     Repository Name: ${repoData.name}
-    Content to Analyze:
-    ${fileContent}
-    
+    Content to Analyze: ${fileContent}
     Owner: ${owner}
     Repo: ${repo}    
     `;
