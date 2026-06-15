@@ -28,10 +28,10 @@
     -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg); 
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-sm), var(--border-glass);
     padding: 2rem;
     box-sizing: border-box;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -51,15 +51,15 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.5s ease;
     pointer-events: none;
     z-index: 1;
 }
 
 .home-page-box:hover {
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.01);
     background: var(--bg-card-hover);
-    box-shadow: var(--shadow-md), var(--shadow-glow);
+    box-shadow: var(--shadow-premium), var(--shadow-glow), var(--border-glass);
     border-color: transparent;
 }
 

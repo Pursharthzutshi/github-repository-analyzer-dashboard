@@ -3,8 +3,9 @@
 :root {
   /* Core Colors */
   --bg-main: #f8fafc; /* very light slate/gray */
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-card-hover: rgba(255, 255, 255, 1);
+  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+  --bg-glass: rgba(255, 255, 255, 0.65);
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
@@ -16,17 +17,19 @@
   --accent-glow: rgba(59, 130, 246, 0.15);
   
   /* Borders & Shadows */
-  --border-color: rgba(0, 0, 0, 0.06);
-  --border-hover: rgba(0, 0, 0, 0.1);
+  --border-color: rgba(226, 232, 240, 0.8);
+  --border-hover: rgba(203, 213, 225, 0.9);
+  --border-glass: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
   --shadow-glow: 0 10px 25px -5px rgba(59, 130, 246, 0.15);
+  --shadow-premium: 0 20px 40px -10px rgba(0, 0, 0, 0.08), 0 10px 20px -5px rgba(0, 0, 0, 0.04);
   
   /* Layout */
-  --glass-blur: blur(16px);
-  --radius-lg: 20px;
-  --radius-md: 12px;
-  --radius-sm: 8px;
+  --glass-blur: blur(24px);
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
 }
 
 body {

@@ -10,6 +10,7 @@ import BoxWrapper from "./box-wrapper"
 import githubRepoAnalysis, { getLatestAnalysis } from "../(actions)/github-analysis"
 import "./home.css"
 import RepositoryGeneralOverview from "../../components/HomePage/RepositoryGeneralOverview"
+import OnboardingGuide from "../../components/HomePage/OnboardingGuide"
 
 export default function Home() {
 
@@ -96,7 +97,9 @@ export default function Home() {
 
             {/* <div className="home-page-box-container">
                 <BoxWrapper flex={1}>
-                    <OnboardingGuide />
+                    <div className="home-page-box">
+                        <OnboardingGuide state={displayState} />
+                    </div>
                 </BoxWrapper>
             </div> */}
         </div>
