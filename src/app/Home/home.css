@@ -1,7 +1,9 @@
 .home{
     display: flex;
     flex-direction: column;
-    gap:20px;
+    gap: 24px;
+    max-width: 1600px;
+    margin: 0 auto;
 }
 
 .home-page-box-container {
@@ -9,27 +11,70 @@
     flex-direction: row;
     align-items: stretch; 
     flex-wrap: wrap;
-    gap: 20px; 
+    gap: 24px; 
     width: 100%;
 }
 
 .box-wrapper {
-    min-width: 250px; 
+    min-width: 300px; 
     display: flex;
 }
 
 .home-page-box {
     width: 100%;
     min-height: 25vh;
-    background-color: white;
-    border-radius: 12px; 
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    padding: 1.5rem;
+    background: var(--bg-card);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); 
+    box-shadow: var(--shadow-sm);
+    padding: 2rem;
     box-sizing: border-box;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-primary);
 }
 
-.repo-analysis-box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+/* Very subtle border accent on hover instead of aggressive gradient */
+.home-page-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+    padding: 2px;
+    background: var(--accent-gradient);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.home-page-box:hover {
+    transform: translateY(-4px);
+    background: var(--bg-card-hover);
+    box-shadow: var(--shadow-md), var(--shadow-glow);
+    border-color: transparent;
+}
+
+.home-page-box:hover::before {
+    opacity: 1;
+}
+
+/* Smooth fade in animation for data */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.github-repo-overview, .file-explorer {
+    animation: fadeIn 0.5s ease-out forwards;
+    position: relative;
+    z-index: 2;
 }

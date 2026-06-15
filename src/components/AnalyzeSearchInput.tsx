@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Search, ArrowRight } from 'lucide-react';
 import './AnalyzeSearchInput.css';
 
 export default function AnalyzeSearchInput({ state, formAction }: { state: any, formAction: any }) {
@@ -12,27 +13,21 @@ export default function AnalyzeSearchInput({ state, formAction }: { state: any, 
     }, [state])
 
     return (
-        <div className="search-container">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '12px' }}>
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-
-            <form action={formAction}>
+        <form action={formAction} className="search-wrapper">
+            <div className="search-container">
+                <Search size={22} className="search-icon" />
                 <input
                     name="github-repo-url"
                     type="text"
                     className="search-input"
-                    placeholder="Enter GitHub Repo URL"
+                    placeholder="Enter GitHub Repo URL to analyze..."
+                    autoComplete="off"
                 />
-                <button className="search-button">
-                    Analyze
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
+                <button type="submit" className="search-button">
+                    <span>Analyze</span>
+                    <ArrowRight size={18} />
                 </button>
-            </form>
-        </div>
+            </div>
+        </form>
     )
 }
