@@ -92,15 +92,6 @@ export default function OnboardingGuide({ state }: { state?: any }) {
         }
     }
 
-    const dirList = Array.from(topDirs).slice(0, 6).map(dir => ({
-        name: dir + "/",
-        desc: `Main source directory for ${dir}`
-    }));
-
-    if (dirList.length === 0) {
-        dirList.push({ name: "src/", desc: "Source files" });
-    }
-
     // 4. Detect framework from packageJson (which is LLM-generated markdown) AND tree text
     //    Use broad text matching instead of strict JSON regex
     const allText = (data.packageJson || "") + " " + (data.tree || "");
@@ -121,6 +112,91 @@ export default function OnboardingGuide({ state }: { state?: any }) {
         else if (installCmd.startsWith("pnpm")) runCmd = "pnpm dev";
         else runCmd = "npm run dev";
     }
+
+    // Smart description mapping for well-known directories
+    const knownDirDescriptions: Record<string, string> = {
+        app: isNext ? "Application routes using the App Router." : "Main application source code.",
+        src: "Primary source code directory.",
+        components: "Reusable UI components.",
+        pages: isNext ? "File-based page routes." : "Page-level components and views.",
+        public: "Static assets served directly (images, fonts, icons).",
+        lib: "Shared utility functions and helper libraries.",
+        utils: "Utility functions and helpers.",
+        hooks: "Custom React hooks.",
+        styles: "Global and shared stylesheets.",
+        assets: "Static assets (images, fonts, media).",
+        api: "API route handlers and backend endpoints.",
+        config: "Configuration files and settings.",
+        types: "TypeScript type definitions and interfaces.",
+        models: "Data models and database schemas.",
+        services: "Service layer and business logic.",
+        middleware: "Middleware functions for request processing.",
+        store: "State management (Redux, Zustand, etc.).",
+        context: "React context providers and consumers.",
+        layouts: "Layout components for page structure.",
+        features: "Feature-based modules and functionality.",
+        modules: "Modular application feature packages.",
+        tests: "Test files and test utilities.",
+        test: "End-to-end and unit tests.",
+        __tests__: "Unit and integration test suites.",
+        docs: "Official documentation source.",
+        scripts: "Build, test and utility scripts.",
+        packages: "Core framework packages and shared libraries.",
+        examples: "Example projects and use cases.",
+        prisma: "Prisma ORM schema and migrations.",
+        migrations: "Database migration files.",
+        routes: "Application route definitions.",
+        controllers: "Request handlers and controllers.",
+        views: "View templates and UI pages.",
+        helpers: "Helper functions and utilities.",
+        constants: "Application constants and enums.",
+        i18n: "Internationalization and locale files.",
+        locales: "Translation and locale files.",
+        plugins: "Plugin modules and extensions.",
+        vendor: "Third-party vendored dependencies.",
+        dist: "Compiled production build output.",
+        build: "Build output and compiled files.",
+        static: "Static files served by the application.",
+        data: "Data files, fixtures, and seeds.",
+        server: "Server-side code and API logic.",
+        client: "Client-side application code.",
+        shared: "Shared code between client and server.",
+        common: "Common utilities shared across modules.",
+        containers: "Container (smart) components with business logic.",
+        reducers: "Redux reducers and state slices.",
+        actions: "Redux actions or server actions.",
+    };
+
+    // Also try to extract descriptions from insights if available
+    let insightDirDescriptions: Record<string, string> = {};
+    try {
+        if (data.insights) {
+            const parsedInsights = JSON.parse(data.insights);
+            if (parsedInsights.directories && typeof parsedInsights.directories === "object") {
+                insightDirDescriptions = parsedInsights.directories;
+            }
+        }
+    } catch {}
+
+    const getDirDescription = (dirName: string): string => {
+        // Priority: insights data > known mapping > generic fallback
+        const lowerName = dirName.toLowerCase();
+        if (insightDirDescriptions[dirName]) return insightDirDescriptions[dirName];
+        if (insightDirDescriptions[lowerName]) return insightDirDescriptions[lowerName];
+        if (knownDirDescriptions[lowerName]) return knownDirDescriptions[lowerName];
+        return `Main source directory for ${dirName}.`;
+    };
+
+    const dirList = Array.from(topDirs).slice(0, 6).map(dir => ({
+        name: dir + "/",
+        desc: getDirDescription(dir)
+    }));
+
+    if (dirList.length === 0) {
+        dirList.push({ name: "src/", desc: "Source files" });
+    }
+
+
 
     // 5. Architecture logic
     const renderArchitecture = () => {
@@ -272,11 +348,14 @@ export default function OnboardingGuide({ state }: { state?: any }) {
                     <h3>4. Getting Started</h3>
                 </div>
                 <div className="og-section-content">
-                    <p className="og-desc-text">Follow these steps to get up and running based on this repo's configuration.</p>
+                    <p className="og-desc-text">Follow these steps to get up and running.</p>
                     
                     <div className="og-steps-list">
                         {[
-                            { title: "Read the README", desc: "Understand the project goals." },
+                            { title: "Read the README.md", desc: "Understand the project goals and features." },
+                            { title: "Explore the project structure", desc: `Start with the ${isNext ? "app/" : isVue ? "src/" : "src/"} and ${topDirs.has("packages") ? "packages/" : "components/"} directories.` },
+                            { title: "Understand routing", desc: isNext ? "Check out app/ and routing-related files." : isVue ? "Review router configuration in src/." : "Review the routing and navigation setup." },
+                            { title: "Review data fetching", desc: isNext ? "Look into fetch utilities and caching strategies." : "Understand how the app loads and manages data." },
                             { title: "Install Dependencies", desc: installCmd, isCode: true },
                             { title: "Run the Project", desc: runCmd, isCode: true }
                         ].map((step, idx) => (
