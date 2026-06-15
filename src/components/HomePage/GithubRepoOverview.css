@@ -1,0 +1,118 @@
+.gro-root {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+    z-index: 2;
+}
+
+.gro-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.gro-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gro-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-radius: 8px;
+    color: var(--accent-primary);
+    border: 1px solid #bfdbfe;
+}
+
+.gro-section-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.gro-expand-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.gro-expand-btn:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    background: #eff6ff;
+}
+
+.gro-content {
+    max-height: 220px;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gro-content--expanded {
+    max-height: 800px;
+    overflow-y: auto;
+}
+
+/* Fade gradient at bottom */
+.gro-fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(to top, var(--bg-card, white) 30%, transparent);
+    pointer-events: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* Empty state */
+.gro-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.75rem;
+    min-height: 180px;
+    padding: 1rem;
+}
+
+.gro-empty-icon {
+    color: var(--accent-primary);
+    opacity: 0.4;
+}
+
+.gro-empty h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.gro-empty p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    max-width: 340px;
+    line-height: 1.5;
+}

@@ -1,0 +1,130 @@
+.fe-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    animation: fadeIn 0.4s ease-out both;
+    z-index: 2;
+    position: relative;
+}
+
+/* Header */
+.fe-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.fe-header-left { display: flex; align-items: center; gap: 0.5rem; }
+.fe-header-badges { display: flex; gap: 0.35rem; }
+
+.fe-icon-wrap {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+    color: #16a34a;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.fe-section-label {
+    font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.fe-badge {
+    font-size: 0.68rem; font-weight: 500;
+    padding: 0.12rem 0.5rem; border-radius: 99px;
+    border: 1px solid var(--border-color);
+    background: #f8fafc; color: var(--text-muted);
+}
+.fe-badge--folder { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+.fe-badge--file   { background: #f0f9ff; border-color: #bae6fd; color: #0369a1; }
+
+/* Scrollable tree */
+.fe-tree {
+    overflow-y: auto;
+    flex: 1;
+    max-height: 400px;
+    padding-right: 2px;
+}
+
+/* Node container */
+.fe-node { user-select: none; }
+
+/* Folder button */
+.fe-folder-btn {
+    display: flex; align-items: center; gap: 0.35rem;
+    width: 100%; background: none; border: none;
+    cursor: pointer; padding: 3px 6px 3px 0;
+    font-family: inherit; font-size: 0.81rem;
+    color: var(--text-primary);
+    border-radius: 6px;
+    transition: background 0.12s ease;
+    text-align: left;
+}
+.fe-folder-btn:hover { background: rgba(245, 158, 11, 0.07); }
+
+.fe-chevron {
+    flex-shrink: 0; color: var(--text-muted);
+    transition: transform 0.18s ease;
+}
+.fe-chevron--open { transform: rotate(90deg); }
+
+.fe-folder-name { font-weight: 600; color: var(--text-primary); font-size: 0.81rem; flex: 1; }
+
+.fe-folder-count {
+    font-size: 0.62rem; font-weight: 600;
+    background: #f1f5f9; border: 1px solid #e2e8f0;
+    border-radius: 99px; padding: 0.05rem 0.4rem;
+    color: var(--text-muted); margin-left: auto;
+}
+
+/* Children with indent line */
+.fe-children {
+    position: relative;
+    display: flex;
+    gap: 0;
+}
+
+.fe-indent-line {
+    position: absolute;
+    left: -10px;
+    top: 0; bottom: 6px;
+    width: 1px;
+    background: #e2e8f0;
+    border-radius: 1px;
+}
+
+.fe-children-inner { flex: 1; }
+
+/* File row */
+.fe-file-row {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 2.5px 6px 2.5px 0;
+    border-radius: 5px;
+    transition: background 0.12s ease;
+    cursor: default;
+}
+.fe-file-row:hover { background: rgba(59, 130, 246, 0.05); }
+
+.fe-file-name {
+    font-size: 0.79rem; color: var(--text-secondary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Empty state */
+.fe-empty {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; gap: 0.7rem;
+    min-height: 200px; padding: 1rem;
+}
+.fe-empty-icon-wrap {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+    display: flex; align-items: center; justify-content: center;
+    color: #16a34a;
+}
+.fe-empty-title { margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+.fe-empty-desc  { margin: 0; font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; max-width: 200px; }

@@ -42,7 +42,8 @@ export default async function githubRepoAnalysis(prevState: any, formData: FormD
             }
         }, undefined, { timeout: 120000 })
 
-        const result = await Promise.all([
+        // Use allSettled so one failing tool doesn't kill the entire analysis
+        const results = await Promise.allSettled([
             analyzeGithubRepoReadmeAnalysis,
             analyzeGithubRepoTreeAnalysis,
             analyzeGithubRepoPackageJSONAnalysis,
@@ -50,16 +51,24 @@ export default async function githubRepoAnalysis(prevState: any, formData: FormD
             analyzeGithubRepoLanguages
         ])
 
-        console.log(result)
+        // Safely extract text from each result (null if tool failed)
+        const getText = (r: PromiseSettledResult<any>) =>
+            r.status === "fulfilled" ? (r.value?.content?.[0]?.text || "") : "";
 
-        // Parse the nested MCP responses into a clean object
+        if (results[0].status === "rejected" && results[1].status === "rejected") {
+            // Core tools failed — surface the error
+            throw new Error("Core analysis tools failed. Check console for details.");
+        }
+
         const parsedAnalysis = {
-            readme: result[0]?.content?.[0]?.text || "",
-            tree: result[1]?.content?.[0]?.text || "",
-            packageJson: result[2]?.content?.[0]?.text || "",
-            insights: result[3]?.content?.[0]?.text || "",
-            languages: result[4]?.content?.[0]?.text || ""
+            readme:      getText(results[0]),
+            tree:        getText(results[1]),
+            packageJson: getText(results[2]),
+            insights:    getText(results[3]),
+            languages:   getText(results[4]),
         };
+
+        console.log("[Analysis] results:", results.map((r, i) => `${i}:${r.status}`).join(" "));
 
         const dataToSave = {
             state: "Success",
