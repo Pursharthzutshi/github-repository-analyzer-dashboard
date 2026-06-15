@@ -22,7 +22,10 @@ import useGithubRepoDataHook from "./useGithubRepoDataHook";
 export default function OnboardingGuide({ state }: { state?: any }) {
     const data = useGithubRepoDataHook(state);
 
-    if (!data?.tree || !data?.packageJson) {
+    // Data is available when any meaningful field exists
+    const hasData = data && (data.tree || data.packageJson || data.insights || data.languages);
+
+    if (!hasData) {
         return (
             <div className="og-root og-empty">
                 <BookOpen size={48} strokeWidth={1.5} className="og-empty-icon" />
@@ -32,7 +35,7 @@ export default function OnboardingGuide({ state }: { state?: any }) {
         );
     }
 
-    // 1. Parse insights for description
+    // 1. Parse insights for description (insights is raw JSON from the API)
     let description = "A GitHub repository analyzed dynamically.";
     try {
         if (data.insights) {
@@ -41,7 +44,7 @@ export default function OnboardingGuide({ state }: { state?: any }) {
         }
     } catch {}
 
-    // 2. Parse languages for pills
+    // 2. Parse languages for pills (languages is raw JSON from the API)
     let topLangs: string[] = [];
     try {
         if (data.languages) {
@@ -52,20 +55,40 @@ export default function OnboardingGuide({ state }: { state?: any }) {
 
     if (topLangs.length === 0) topLangs = ["Code", "Markdown"];
 
-    // 3. Parse tree for directories and files
+    // 3. Parse tree for directories
+    //    NOTE: data.tree is LLM-generated markdown, not raw paths.
+    //    We look for folder-like patterns: lines containing "/" or ending with "/"
+    //    or lines that look like directory names in markdown (e.g., `src/`, **app/**)
     const treeText = data.tree || "";
-    const treeLines = treeText.split("\n");
     const topDirs = new Set<string>();
     const rootFiles = new Set<string>();
 
-    for (const line of treeLines) {
-        if (!line.trim()) continue;
-        const parts = line.split("/");
-        if (parts.length === 1) {
-            rootFiles.add(parts[0].toLowerCase());
-            rootFiles.add(parts[0]); // Keep original case too
-        } else {
-            topDirs.add(parts[0]);
+    // Try to extract folder names from markdown tree output
+    const folderPatterns = treeText.match(/(?:^|\s|`|\/|\*\*)([\w.-]+)\//gm) || [];
+    for (const match of folderPatterns) {
+        const dirName = match.replace(/^[\s`/*]+/, "").replace(/\/.*$/, "").trim();
+        if (dirName && dirName.length > 1 && dirName.length < 40 && !dirName.startsWith(".")) {
+            topDirs.add(dirName);
+        }
+    }
+
+    // Extract root file names from markdown (e.g., `package.json`, `tsconfig.json`)
+    const filePatterns = treeText.match(/`([\w.-]+\.\w+)`/g) || [];
+    for (const match of filePatterns) {
+        const fileName = match.replace(/`/g, "").trim();
+        if (fileName) {
+            rootFiles.add(fileName);
+            rootFiles.add(fileName.toLowerCase());
+        }
+    }
+
+    // Also check for common file names mentioned without backticks
+    const commonFiles = ["README.md", "package.json", "tsconfig.json", "next.config.js", "next.config.mjs",
+        "vite.config.ts", "docker-compose.yml", "Dockerfile", "yarn.lock", "pnpm-lock.yaml", ".env"];
+    for (const file of commonFiles) {
+        if (treeText.includes(file)) {
+            rootFiles.add(file);
+            rootFiles.add(file.toLowerCase());
         }
     }
 
@@ -78,20 +101,22 @@ export default function OnboardingGuide({ state }: { state?: any }) {
         dirList.push({ name: "src/", desc: "Source files" });
     }
 
-    // 4. Parse package.json for commands and architecture
-    const pkgText = data.packageJson || "";
-    const isNext = /"next":/i.test(pkgText);
-    const isReact = /"react":/i.test(pkgText);
-    const isExpress = /"express":/i.test(pkgText);
+    // 4. Detect framework from packageJson (which is LLM-generated markdown) AND tree text
+    //    Use broad text matching instead of strict JSON regex
+    const allText = (data.packageJson || "") + " " + (data.tree || "");
+    const isNext = /next\.?js|next\.config|"next"/i.test(allText);
+    const isReact = /react|"react"/i.test(allText);
+    const isExpress = /express\.?js|"express"/i.test(allText);
+    const isVue = /vue\.?js|"vue"/i.test(allText);
 
     // Guess install command
     let installCmd = "npm install";
-    if (rootFiles.has("yarn.lock")) installCmd = "yarn install";
-    else if (rootFiles.has("pnpm-lock.yaml")) installCmd = "pnpm install";
+    if (rootFiles.has("yarn.lock") || allText.includes("yarn.lock")) installCmd = "yarn install";
+    else if (rootFiles.has("pnpm-lock.yaml") || allText.includes("pnpm-lock")) installCmd = "pnpm install";
 
     // Guess run command
     let runCmd = "npm start";
-    if (pkgText.includes('"dev":')) {
+    if (allText.includes("dev") && (allText.includes("script") || allText.includes('"dev"'))) {
         if (installCmd.startsWith("yarn")) runCmd = "yarn dev";
         else if (installCmd.startsWith("pnpm")) runCmd = "pnpm dev";
         else runCmd = "npm run dev";
@@ -107,6 +132,16 @@ export default function OnboardingGuide({ state }: { state?: any }) {
                     <div className="og-arch-node og-arch-node--router"><LayoutTemplate size={24} className="og-arch-icon" /><h4>App Router</h4><span>Next.js</span></div>
                     <ArrowRight className="og-arch-arrow" size={20} />
                     <div className="og-arch-node og-arch-node--server"><Server size={24} className="og-arch-icon" /><h4>Server</h4><span>SSR / API</span></div>
+                </div>
+            );
+        } else if (isVue) {
+            return (
+                <div className="og-arch-flow">
+                    <div className="og-arch-node og-arch-node--client"><Globe size={24} className="og-arch-icon" /><h4>Client</h4><span>Vue.js SPA</span></div>
+                    <ArrowRight className="og-arch-arrow" size={20} />
+                    <div className="og-arch-node og-arch-node--router"><LayoutTemplate size={24} className="og-arch-icon" /><h4>Vue Router</h4><span>SFC Components</span></div>
+                    <ArrowRight className="og-arch-arrow" size={20} />
+                    <div className="og-arch-node og-arch-node--api"><Code2 size={24} className="og-arch-icon" /><h4>Static Build</h4><span>dist/build</span></div>
                 </div>
             );
         } else if (isReact) {
@@ -152,7 +187,10 @@ export default function OnboardingGuide({ state }: { state?: any }) {
         { name: "Dockerfile", desc: "Container specs", icon: <Server size={16}/> }
     ];
 
-    const foundFiles = possibleFiles.filter(f => rootFiles.has(f.name) || rootFiles.has(f.name.toLowerCase()));
+    // Match files found in tree text (either via regex or simple includes)
+    const foundFiles = possibleFiles.filter(f => 
+        rootFiles.has(f.name) || rootFiles.has(f.name.toLowerCase()) || allText.includes(f.name)
+    );
     
     if (foundFiles.length === 0) {
         foundFiles.push({ name: "Source Code", desc: "Main project files", icon: <FileCode size={16}/> });
