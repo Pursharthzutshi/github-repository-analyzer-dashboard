@@ -1,4 +1,4 @@
-import React from "react";
+
 import { PieChart } from "lucide-react";
 import useGithubRepoDataHook from "./useGithubRepoDataHook";
 import "./RepositoryInsights.css";

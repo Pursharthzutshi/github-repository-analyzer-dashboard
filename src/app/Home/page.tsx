@@ -2,8 +2,7 @@ import { useActionState, useEffect, useState } from "react"
 import AnalyzeSearchInput from "../../components/AnalyzeSearchInput"
 import FileExplorer from "../../components/HomePage/FileExplorer"
 import GithubRepoOverview from "../../components/HomePage/GithubRepoOverview"
-// import OnBoardingGuide from "../../components/HomePage/OnBoardingGude"
-import RecentQuestions from "../../components/HomePage/RecentQuestions"
+
 import RepositoryInsights from "../../components/HomePage/RepositoryInsights"
 import SemanticSearch from "../../components/HomePage/SemanticSearch"
 import TechStack from "../../components/HomePage/TechStack"
@@ -72,16 +71,6 @@ export default function Home() {
 
             </div>
 
-            {/* <div className="home-page-box-container">
-
-                <BoxWrapper flex={1}>
-                    <div className="home-page-box">
-                        <TechStack state={displayState} />
-                    </div>
-                </BoxWrapper>
-
-            </div> */}
-
             <div className="home-page-box-container">
 
                 <BoxWrapper flex={1}>
@@ -92,9 +81,7 @@ export default function Home() {
 
                 <BoxWrapper flex={2}>
                     <div className="home-page-box">
-                        {/* <OnBoardingGuide /> */}
                         <RepositoryGeneralOverview state={displayState} />
-
                     </div>
                 </BoxWrapper>
 
@@ -102,11 +89,16 @@ export default function Home() {
                     <div className="home-page-box">
                         {/* <RecentQuestions /> */}
                         <TechStack state={displayState} />
-
                     </div>
                 </BoxWrapper>
 
             </div>
+
+            {/* <div className="home-page-box-container">
+                <BoxWrapper flex={1}>
+                    <OnboardingGuide />
+                </BoxWrapper>
+            </div> */}
         </div>
     )
 }

@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import { useState } from "react";
 import { ChevronRight, FolderTree } from "lucide-react";
 import useGithubRepoDataHook from "./useGithubRepoDataHook";

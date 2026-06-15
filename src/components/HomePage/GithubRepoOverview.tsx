@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, GitBranch, User, ChevronRight } from "lucide-react";
+import { BookOpen, GitBranch, ChevronRight } from "lucide-react";
 import Markdown from "react-markdown";
 import useGithubRepoDataHook from "./useGithubRepoDataHook";
 import "./GithubRepoOverview.css";

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 
-const CACHE_VERSION = 2; // bump this whenever parsedAnalysis schema changes
 
 export default function useGithubRepoDataHook(state?: any) {
     const [parsedData, setParsedData] = useState<any>(null);

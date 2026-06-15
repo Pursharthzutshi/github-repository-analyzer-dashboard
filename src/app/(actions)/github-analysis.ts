@@ -1,6 +1,6 @@
 import { ConnectMCP } from "../mcp/connect-mcp"
 
-export default async function githubRepoAnalysis(prevState: any, formData: FormData) {
+export default async function githubRepoAnalysis(_prevState: any, formData: FormData) {
 
     const githubRepoUrl = formData.get("github-repo-url") as string;
     try {
@@ -43,13 +43,13 @@ export default async function githubRepoAnalysis(prevState: any, formData: FormD
         }, undefined, { timeout: 120000 })
 
         // Use allSettled so one failing tool doesn't kill the entire analysis
-        const results = await Promise.allSettled([
+        const results = (await Promise.allSettled([
             analyzeGithubRepoReadmeAnalysis,
             analyzeGithubRepoTreeAnalysis,
             analyzeGithubRepoPackageJSONAnalysis,
             analyzeGithubRepoInsights,
             analyzeGithubRepoLanguages
-        ])
+        ])) as any[];
 
         // Safely extract text from each result (null if tool failed)
         const getText = (r: PromiseSettledResult<any>) =>

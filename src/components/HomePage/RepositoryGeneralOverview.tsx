@@ -7,12 +7,11 @@ import "./RepositoryGeneralOverview.css";
 function extractDeps(text: string): { name: string; version: string; type: "dep" | "dev" }[] | null {
     const deps: { name: string; version: string; type: "dep" | "dev" }[] = [];
     const lines = text.split("\n");
-    let inDeps = false;
     let inDevDeps = false;
 
     for (const line of lines) {
-        if (/dependencies/i.test(line) && !/dev/i.test(line)) { inDeps = true; inDevDeps = false; }
-        if (/devdependencies/i.test(line)) { inDevDeps = true; inDeps = false; }
+        if (/dependencies/i.test(line) && !/dev/i.test(line)) { inDevDeps = false; }
+        if (/devdependencies/i.test(line)) { inDevDeps = true; }
 
         // Match lines like: - **package-name**: `^1.2.3`  or  - **package**: "version"
         const match = line.match(/\*\*([^*]+)\*\*[^`"]*[`"]([^`"]+)[`"]/);

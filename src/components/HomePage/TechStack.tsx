@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Code2 } from "lucide-react";
 import useGithubRepoDataHook from "./useGithubRepoDataHook";
 import "./TechStack.css";
