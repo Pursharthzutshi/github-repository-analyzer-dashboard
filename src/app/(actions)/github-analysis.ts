@@ -1,7 +1,7 @@
 'use server';
 
-import { test } from "../lib/models/analysis";
 import { ConnectMCP } from "../mcp/connect-mcp"
+import { saveGithubAnalysisRepoData } from "./store-repo-data";
 
 export default async function githubRepoAnalysis(_prevState: any, formData: FormData) {
 
@@ -71,6 +71,8 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             languages: getText(results[4]),
         };
 
+
+
         console.log("[Analysis] results:", results.map((r, i) => `${i}:${r.status}`).join(" "));
 
         const dataToSave = {
@@ -79,6 +81,8 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             data: JSON.stringify(parsedAnalysis),
             timestamp: Date.now()
         };
+
+        saveGithubAnalysisRepoData(parsedAnalysis)
 
         // localStorage.setItem("latest_github_analysis", JSON.stringify(dataToSave));
 
@@ -97,14 +101,3 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
     }
 }
 
-
-export async function testDB() {
-    const createTable = await test()
-
-    return {
-        state: "success",
-        message: "table is created successfully",
-        data: createTable
-    };
-
-}
