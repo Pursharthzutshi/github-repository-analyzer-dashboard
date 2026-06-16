@@ -3,7 +3,7 @@ export async function openrouter(messages: { role: string, content: any }[]) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${import.meta.env.VITE_OPEN_ROUTER_API_KEY}`
+            "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
         },
         body: JSON.stringify({
             model: "openai/gpt-4o-mini",
