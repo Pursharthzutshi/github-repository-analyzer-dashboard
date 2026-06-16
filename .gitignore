@@ -1,9 +1,12 @@
 # Dependencies
 node_modules/
 
-# Build output
-dist/
-dist-ssr/
+# Next.js build output
+.next/
+out/
+
+# Production build
+build/
 
 # Environment variables
 .env
@@ -12,10 +15,6 @@ dist-ssr/
 .env.development.local
 .env.test.local
 .env.production.local
-
-# Vite
-*.local
-vite.config.ts.timestamp-*
 
 # TypeScript build info
 *.tsbuildinfo
@@ -40,3 +39,6 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Vercel
+.vercel

@@ -1,15 +1,16 @@
-import { useActionState, useEffect, useState } from "react"
-import AnalyzeSearchInput from "../../components/AnalyzeSearchInput"
-import FileExplorer from "../../components/HomePage/FileExplorer"
-import GithubRepoOverview from "../../components/HomePage/GithubRepoOverview"
+'use client';
 
-import RepositoryInsights from "../../components/HomePage/RepositoryInsights"
-import SemanticSearch from "../../components/HomePage/SemanticSearch"
-import TechStack from "../../components/HomePage/TechStack"
+import { useActionState, useEffect, useState } from "react"
+import AnalyzeSearchInput from "../components/AnalyzeSearchInput"
+import FileExplorer from "../components/HomePage/FileExplorer"
+import GithubRepoOverview from "../components/HomePage/GithubRepoOverview"
+import RepositoryInsights from "../components/HomePage/RepositoryInsights"
+import SemanticSearch from "../components/HomePage/SemanticSearch"
+import TechStack from "../components/HomePage/TechStack"
 import BoxWrapper from "./box-wrapper"
-import githubRepoAnalysis, { getLatestAnalysis } from "../(actions)/github-analysis"
+import githubRepoAnalysis, { getLatestAnalysis } from "./(actions)/github-analysis"
 import "./home.css"
-import RepositoryGeneralOverview from "../../components/HomePage/RepositoryGeneralOverview"
+import RepositoryGeneralOverview from "../components/HomePage/RepositoryGeneralOverview"
 
 
 export default function Home() {

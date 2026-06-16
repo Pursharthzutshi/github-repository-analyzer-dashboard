@@ -1,3 +1,6 @@
+'use server';
+
+import { test } from "../lib/models/analysis";
 import { ConnectMCP } from "../mcp/connect-mcp"
 
 export default async function githubRepoAnalysis(_prevState: any, formData: FormData) {
@@ -61,11 +64,11 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
         }
 
         const parsedAnalysis = {
-            readme:      getText(results[0]),
-            tree:        getText(results[1]),
+            readme: getText(results[0]),
+            tree: getText(results[1]),
             packageJson: getText(results[2]),
-            insights:    getText(results[3]),
-            languages:   getText(results[4]),
+            insights: getText(results[3]),
+            languages: getText(results[4]),
         };
 
         console.log("[Analysis] results:", results.map((r, i) => `${i}:${r.status}`).join(" "));
@@ -76,7 +79,8 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             data: JSON.stringify(parsedAnalysis),
             timestamp: Date.now()
         };
-        localStorage.setItem("latest_github_analysis", JSON.stringify(dataToSave));
+
+        // localStorage.setItem("latest_github_analysis", JSON.stringify(dataToSave));
 
         return {
             state: "Success",
@@ -91,6 +95,18 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             data: null
         }
     }
+}
+
+
+export async function testDB() {
+    const createTable = await test()
+
+    return {
+        state: "success",
+        message: "table is created successfully",
+        data: createTable
+    };
+
 }
 
 export async function getLatestAnalysis() {

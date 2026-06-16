@@ -1,3 +1,5 @@
+'use client';
+
 import type { JSX } from "react";
 import { useEffect, useState, useMemo } from "react";
 import { ChevronRight, FolderTree, Search, FileCode2, FolderOpen, AlertCircle } from "lucide-react";
