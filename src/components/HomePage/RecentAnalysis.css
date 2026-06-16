@@ -1,11 +1,11 @@
-.recent-analyses-container {
+.recent-analysis-container {
     display: flex;
     flex-direction: column;
     gap: 12px;
     margin-bottom: 24px;
 }
 
-.recent-analyses-header {
+.recent-analysis-header {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -16,7 +16,7 @@
     letter-spacing: 0.05em;
 }
 
-.recent-analyses-list {
+.recent-analysis-list {
     display: flex;
     flex-direction: column;
     gap: 12px;

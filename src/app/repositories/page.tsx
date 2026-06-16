@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { ChevronRight, FolderTree, Search, FileCode2, FolderOpen, AlertCircle, History, ExternalLink, Clock } from "lucide-react";
-import { fetchAllAnalyses, fetchAnalysisById } from "../(actions)/get-analysis";
+import { fetchAllAnalysis, fetchAnalysisById } from "../(actions)/get-analysis";
 import {
     buildTree, countFiles, getFileTypes, filterTree,
     FolderIcon, FileIcon,
@@ -86,12 +86,12 @@ function HistoryPanel({
     onSelect: (id: number) => void;
     activeId: number | null;
 }) {
-    const [analyses, setAnalyses] = useState<any[]>([]);
+    const [analysisList, setAnalysisList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchAllAnalyses().then((rows) => {
-            setAnalyses(rows);
+        fetchAllAnalysis().then((rows) => {
+            setAnalysisList(rows);
             setLoading(false);
         });
     }, []);
@@ -119,11 +119,11 @@ function HistoryPanel({
             </div>
             {loading ? (
                 <p className="re-history-empty">Loading...</p>
-            ) : analyses.length === 0 ? (
-                <p className="re-history-empty">No analyses yet.</p>
+            ) : analysisList.length === 0 ? (
+                <p className="re-history-empty">No analysis yet.</p>
             ) : (
                 <ul className="re-history-list">
-                    {analyses.map((a) => (
+                    {analysisList.map((a) => (
                         <li key={a.id}>
                             <button
                                 className={`re-history-item ${activeId === a.id ? "re-history-item--active" : ""}`}

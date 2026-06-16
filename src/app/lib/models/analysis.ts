@@ -62,7 +62,7 @@ export async function insertDataInGithubAnalysisRepoData(
     return result.rows[0];
 }
 
-export async function getAllAnalyses() {
+export async function getAllAnalysis() {
     const result = await pool.query(`
         SELECT id, repo_url, analyzed_at
         FROM github_repo_analysis_data

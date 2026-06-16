@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { History, Clock, ExternalLink } from "lucide-react";
-import { fetchAllAnalyses, fetchAnalysisById } from "../../app/(actions)/get-analysis";
+import { fetchAllAnalysis, fetchAnalysisById } from "../../app/(actions)/get-analysis";
 import { saveAnalysisToStorage } from "../../app/lib/storage";
-import "./RecentAnalyses.css";
+import "./RecentAnalysis.css";
 
-export default function RecentAnalyses({ onSelectAnalysis }: { onSelectAnalysis: (data: any) => void }) {
-    const [analyses, setAnalyses] = useState<any[]>([]);
+export default function RecentAnalysis({ onSelectAnalysis }: { onSelectAnalysis: (data: any) => void }) {
+    const [analysisList, setAnalysisList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchAllAnalyses().then((rows) => {
-            setAnalyses(rows);
+        fetchAllAnalysis().then((rows) => {
+            setAnalysisList(rows);
             setLoading(false);
         });
     }, []);
@@ -60,16 +60,16 @@ export default function RecentAnalyses({ onSelectAnalysis }: { onSelectAnalysis:
     };
 
     if (loading) return null;
-    if (analyses.length === 0) return null;
+    if (analysisList.length === 0) return null;
 
     return (
-        <div className="recent-analyses-container">
-            <div className="recent-analyses-header">
+        <div className="recent-analysis-container">
+            <div className="recent-analysis-header">
                 <History size={16} />
-                <span>Recent Analyses</span>
+                <span>Recent Analysis</span>
             </div>
-            <div className="recent-analyses-list">
-                {analyses.map(a => (
+            <div className="recent-analysis-list">
+                {analysisList.map(a => (
                     <button key={a.id} className="recent-analysis-item" onClick={() => handleSelect(a.id)}>
                         <span className="ra-name">{getRepoName(a.repo_url)}</span>
                         <span className="ra-meta">

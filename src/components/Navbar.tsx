@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { GitBranch, Bell, User, History } from 'lucide-react';
-import RecentAnalyses from './HomePage/RecentAnalyses';
+import RecentAnalysis from './HomePage/RecentAnalysis';
 
 export default function Navbar(){
     const [showRecent, setShowRecent] = useState(false);
@@ -36,7 +36,7 @@ export default function Navbar(){
                     </button>
                     {showRecent && (
                         <div style={{ position: "absolute", top: "120%", right: 0, width: "350px", background: "var(--bg-card)", border: "1px solid var(--border-color)", borderRadius: "var(--radius-lg)", padding: "16px", boxShadow: "var(--shadow-xl)", maxHeight: "400px", overflowY: "auto" }}>
-                            <RecentAnalyses onSelectAnalysis={(data) => {
+                            <RecentAnalysis onSelectAnalysis={(data) => {
                                 window.dispatchEvent(new CustomEvent('select-analysis', { detail: data }));
                                 setShowRecent(false);
                             }} />
