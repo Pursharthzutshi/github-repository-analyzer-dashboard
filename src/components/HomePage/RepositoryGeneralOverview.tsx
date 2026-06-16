@@ -39,7 +39,7 @@ function pkgUrl(name: string): string | null {
     return KNOWN_URLS[lower] ?? `https://www.npmjs.com/package/${name}`;
 }
 
-export default function RepositoryGeneralOverview({ state }: { state?: any }) {
+export default function RepositoryGeneralOverview({ state }: { state?: { data?: string; message?: string; state?: string } }) {
     const data = useGithubRepoDataHook(state);
 
     if (!data?.packageJson) {

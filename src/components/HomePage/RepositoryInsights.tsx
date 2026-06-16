@@ -22,15 +22,15 @@ interface LangEntry { language: string; bytes: number; percentage: number; }
 function DonutChart({ langs }: { langs: LangEntry[] }) {
     const R = 36, CX = 44, CY = 44, STROKE = 14;
     const circumference = 2 * Math.PI * R;
-    let cumulativePct = 0;
 
-    const segments = langs.map((l, i) => {
-        const startPct = cumulativePct;
-        cumulativePct += l.percentage;
+    const segments: (LangEntry & { offset: number; rotate: number; color: string })[] = [];
+    langs.reduce((acc, l, i) => {
+        const startPct = acc;
         const offset = circumference - (l.percentage / 100) * circumference;
         const rotate = (startPct / 100) * 360 - 90;
-        return { ...l, offset, rotate, color: langColor(l.language, i) };
-    });
+        segments.push({ ...l, offset, rotate, color: langColor(l.language, i) });
+        return acc + l.percentage;
+    }, 0);
 
     return (
         <div className="ri-donut-wrap">
@@ -55,7 +55,7 @@ function DonutChart({ langs }: { langs: LangEntry[] }) {
     );
 }
 
-export default function RepositoryInsights({ state }: { state?: any }) {
+export default function RepositoryInsights({ state }: { state?: { data?: string; message?: string; state?: string } }) {
     const githubRepoData = useGithubRepoDataHook(state);
 
     let langs: LangEntry[] = [];

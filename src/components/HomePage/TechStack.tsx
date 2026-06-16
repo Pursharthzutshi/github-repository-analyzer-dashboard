@@ -46,7 +46,7 @@ function formatTechName(name: string) {
     return map[name.toLowerCase()] || name;
 }
 
-export default function TechStack({ state }: { state?: any }) {
+export default function TechStack({ state }: { state?: { data?: string; message?: string; state?: string } }) {
     const githubRepoData = useGithubRepoDataHook(state);
 
     let langs: { language: string; percentage: number }[] = [];
@@ -54,7 +54,7 @@ export default function TechStack({ state }: { state?: any }) {
         try { langs = JSON.parse(githubRepoData.languages); } catch { /* ignore */ }
     }
 
-    let deps: string[] = [];
+    const deps: string[] = [];
     if (githubRepoData?.packageJson) {
         const lines = githubRepoData.packageJson.split("\n");
         for (const line of lines) {

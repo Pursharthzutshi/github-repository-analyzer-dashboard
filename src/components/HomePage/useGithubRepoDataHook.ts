@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { getLatestAnalysisFromStorage } from "../../app/lib/storage";
 
-export default function useGithubRepoDataHook(state?: any) {
+export default function useGithubRepoDataHook(state?: { data?: string; message?: string; state?: string }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [parsedData, setParsedData] = useState<any>(null);
 
     useEffect(() => {
