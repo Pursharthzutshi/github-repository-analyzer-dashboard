@@ -108,21 +108,3 @@ export async function testDB() {
     };
 
 }
-
-export async function getLatestAnalysis() {
-    try {
-        const stored = localStorage.getItem("latest_github_analysis");
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            return {
-                state: parsed.state,
-                message: parsed.message,
-                data: parsed.data
-            };
-        }
-        return null;
-    } catch (e) {
-        console.error("Failed to load latest analysis", e);
-        return null;
-    }
-}

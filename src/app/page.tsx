@@ -8,7 +8,8 @@ import RepositoryInsights from "../components/HomePage/RepositoryInsights"
 import SemanticSearch from "../components/HomePage/SemanticSearch"
 import TechStack from "../components/HomePage/TechStack"
 import BoxWrapper from "./box-wrapper"
-import githubRepoAnalysis, { getLatestAnalysis } from "./(actions)/github-analysis"
+import githubRepoAnalysis from "./(actions)/github-analysis"
+import { getLatestAnalysisFromStorage, saveAnalysisToStorage } from "./lib/storage"
 import "./home.css"
 import RepositoryGeneralOverview from "../components/HomePage/RepositoryGeneralOverview"
 
@@ -25,18 +26,21 @@ export default function Home() {
     const [displayState, setDisplayState] = useState(initialState)
 
     useEffect(() => {
-        async function fetchLatest() {
-            const latest = await getLatestAnalysis();
-            if (latest) {
-                setDisplayState(latest);
-            }
+        const latest = getLatestAnalysisFromStorage();
+        if (latest) {
+            setDisplayState(latest);
         }
-        fetchLatest();
     }, []);
 
     useEffect(() => {
         if (state && state.data) {
             setDisplayState(state);
+            saveAnalysisToStorage({
+                state: state.state,
+                message: state.message,
+                data: state.data,
+                timestamp: Date.now()
+            });
         }
     }, [state]);
 

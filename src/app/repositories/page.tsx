@@ -3,7 +3,7 @@
 import type { JSX } from "react";
 import { useEffect, useState, useMemo } from "react";
 import { ChevronRight, FolderTree, Search, FileCode2, FolderOpen, AlertCircle } from "lucide-react";
-import { getLatestAnalysis } from "../(actions)/github-analysis";
+import { getLatestAnalysisFromStorage } from "../lib/storage";
 import "./RepositoryExplorer.css";
 
 /* ── Shared logic copied from FileExplorer for simplicity ── */
@@ -122,20 +122,17 @@ export default function RepositoryExplorer() {
     const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
 
     useEffect(() => {
-        async function fetchLatest() {
-            const latest = await getLatestAnalysis();
-            if (latest?.data) {
-                try {
-                    const parsed = JSON.parse(latest.data);
-                    if (parsed?.tree) {
-                        setTreeData(parsed.tree);
-                    }
-                } catch(e) {
-                    console.error("Failed to parse", e);
+        const latest = getLatestAnalysisFromStorage();
+        if (latest?.data) {
+            try {
+                const parsed = JSON.parse(latest.data);
+                if (parsed?.tree) {
+                    setTreeData(parsed.tree);
                 }
+            } catch(e) {
+                console.error("Failed to parse", e);
             }
         }
-        fetchLatest();
     }, []);
 
     const fullTree = useMemo(() => treeData ? buildTree(treeData) : [], [treeData]);

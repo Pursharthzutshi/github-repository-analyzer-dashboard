@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getLatestAnalysis } from "../../app/(actions)/github-analysis";
+import { getLatestAnalysisFromStorage } from "../../app/lib/storage";
 
 export default function useGithubRepoDataHook(state?: any) {
     const [parsedData, setParsedData] = useState<any>(null);
@@ -9,7 +9,7 @@ export default function useGithubRepoDataHook(state?: any) {
             let dataToParse = state?.data;
 
             if (!dataToParse) {
-                const latest = await getLatestAnalysis();
+                const latest = getLatestAnalysisFromStorage();
                 if (latest?.data) {
                     dataToParse = latest.data;
                 }
