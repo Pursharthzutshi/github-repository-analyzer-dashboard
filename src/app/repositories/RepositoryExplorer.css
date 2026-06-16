@@ -276,3 +276,112 @@
     font-size: 0.9rem;
     color: var(--text-secondary);
 }
+
+/* ── Layout with history panel ───────────────────────────── */
+.re-main--with-history {
+    display: grid;
+    grid-template-columns: 220px 350px 1fr;
+    gap: 1.5rem;
+    flex: 1;
+    min-height: 0;
+}
+
+.re-content-empty--center {
+    grid-column: 2 / -1;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+/* ── History panel ───────────────────────────────────────── */
+.re-history-panel {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.re-history-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.re-history-empty {
+    padding: 1.25rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 0;
+}
+
+.re-history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.re-history-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    position: relative;
+    transition: background 0.15s;
+}
+
+.re-history-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.re-history-item--active {
+    background: rgba(59, 130, 246, 0.12) !important;
+    border-left: 2px solid #3b82f6;
+}
+
+.re-history-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.re-history-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.re-history-link {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    transition: opacity 0.15s;
+}
+
+.re-history-link:hover {
+    opacity: 1;
+    color: #3b82f6;
+}

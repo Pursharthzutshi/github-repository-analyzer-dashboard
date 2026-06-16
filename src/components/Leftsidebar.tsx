@@ -3,17 +3,11 @@
 import { Home, FolderGit2, BarChart2, Settings, HelpCircle, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useActionState } from 'react';
-import { testDB } from '../app/(actions)/github-analysis';
+
 
 export default function Leftsidebar() {
     const pathname = usePathname();
-    const initialState: any = {
-        state: "",
-        message: "",
-        data: null
-    }
-    const [state, formAction] = useActionState(testDB, initialState)
+
 
     return (
         <div className="left-sidebar">
@@ -51,11 +45,9 @@ export default function Leftsidebar() {
                 <button className="nav-item" aria-label="Help">
                     <HelpCircle size={24} />
                 </button>
-                <form action={formAction}>
-                    <button type='submit' className="nav-item" aria-label="Settings">
-                        <Settings size={24} />
-                    </button>
-                </form>
+                <button className="nav-item" aria-label="Settings">
+                    <Settings size={24} />
+                </button>
             </div>
         </div>
     )

@@ -64,6 +64,7 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
         }
 
         const parsedAnalysis = {
+            repo_url: githubRepoUrl,
             readme: getText(results[0]),
             tree: getText(results[1]),
             packageJson: getText(results[2]),
@@ -82,7 +83,7 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             timestamp: Date.now()
         };
 
-        saveGithubAnalysisRepoData(parsedAnalysis)
+        await saveGithubAnalysisRepoData(parsedAnalysis)
 
         // localStorage.setItem("latest_github_analysis", JSON.stringify(dataToSave));
 

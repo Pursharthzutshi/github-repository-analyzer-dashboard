@@ -13,7 +13,6 @@ import { getLatestAnalysisFromStorage, saveAnalysisToStorage } from "./lib/stora
 import "./home.css"
 import RepositoryGeneralOverview from "../components/HomePage/RepositoryGeneralOverview"
 
-
 export default function Home() {
 
     const initialState: any = {
@@ -44,60 +43,74 @@ export default function Home() {
         }
     }, [state]);
 
+    useEffect(() => {
+        const handleCustomSelect = (e: any) => {
+            if (e.detail) {
+                setDisplayState(e.detail);
+            }
+        };
+        window.addEventListener('select-analysis', handleCustomSelect);
+        return () => window.removeEventListener('select-analysis', handleCustomSelect);
+    }, []);
+
     return (
         <div className="home">
 
             <AnalyzeSearchInput state={displayState} formAction={formAction} />
 
-            <BoxWrapper flex={2}>
-                <div className="home-page-box">
-                    <GithubRepoOverview state={displayState} />
+            <div className="home-layout">
+                <div className="home-main-content">
+                    <BoxWrapper flex={2}>
+                        <div className="home-page-box">
+                            <GithubRepoOverview state={displayState} />
+                        </div>
+                    </BoxWrapper>
+
+                    <div className="home-page-box-container">
+
+                        <BoxWrapper flex={1}>
+                            <div className="home-page-box">
+                                <FileExplorer state={displayState} />
+                            </div>
+                        </BoxWrapper>
+
+                        <BoxWrapper flex={1}>
+                            <div className="home-page-box">
+                                Chat
+                            </div>
+                        </BoxWrapper>
+
+                        <BoxWrapper flex={1}>
+                            <div className="home-page-box">
+                                <SemanticSearch />
+                            </div>
+                        </BoxWrapper>
+
+                    </div>
+
+                    <div className="home-page-box-container">
+
+                        <BoxWrapper flex={1}>
+                            <div className="home-page-box">
+                                <RepositoryInsights state={displayState} />
+                            </div>
+                        </BoxWrapper>
+
+                        <BoxWrapper flex={1}>
+                            <div className="home-page-box">
+                                <RepositoryGeneralOverview state={displayState} />
+                            </div>
+                        </BoxWrapper>
+
+                        <BoxWrapper flex={1}>
+                            <div className="home-page-box">
+                                {/* <RecentQuestions /> */}
+                                <TechStack state={displayState} />
+                            </div>
+                        </BoxWrapper>
+
+                    </div>
                 </div>
-            </BoxWrapper>
-
-            <div className="home-page-box-container">
-
-                <BoxWrapper flex={2}>
-                    <div className="home-page-box">
-                        <FileExplorer state={displayState} />
-                    </div>
-                </BoxWrapper>
-
-                <BoxWrapper flex={1}>
-                    <div className="home-page-box">
-                        Chat
-                    </div>
-                </BoxWrapper>
-
-                <BoxWrapper flex={1}>
-                    <div className="home-page-box">
-                        <SemanticSearch />
-                    </div>
-                </BoxWrapper>
-
-            </div>
-
-            <div className="home-page-box-container">
-
-                <BoxWrapper flex={1}>
-                    <div className="home-page-box">
-                        <RepositoryInsights state={displayState} />
-                    </div>
-                </BoxWrapper>
-
-                <BoxWrapper flex={2}>
-                    <div className="home-page-box">
-                        <RepositoryGeneralOverview state={displayState} />
-                    </div>
-                </BoxWrapper>
-
-                <BoxWrapper flex={1}>
-                    <div className="home-page-box">
-                        {/* <RecentQuestions /> */}
-                        <TechStack state={displayState} />
-                    </div>
-                </BoxWrapper>
-
             </div>
 
             {/* <div className="home-page-box-container">
@@ -110,4 +123,3 @@ export default function Home() {
         </div>
     )
 }
-
