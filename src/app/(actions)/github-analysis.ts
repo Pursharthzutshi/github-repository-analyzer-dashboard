@@ -1,5 +1,6 @@
 'use server';
 
+import { vectorEmbeddingStore } from "../lib/rag/vector-store";
 import { ConnectMCP } from "../mcp/connect-mcp"
 import { saveGithubAnalysisRepoData } from "./store-repo-data";
 
@@ -82,6 +83,8 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             data: JSON.stringify(parsedAnalysis),
             timestamp: Date.now()
         };
+
+        await vectorEmbeddingStore(parsedAnalysis, githubRepoUrl)
 
         await saveGithubAnalysisRepoData(parsedAnalysis)
 

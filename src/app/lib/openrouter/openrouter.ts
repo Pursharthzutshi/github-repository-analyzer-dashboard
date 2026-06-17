@@ -16,3 +16,20 @@ export async function openrouter(messages: { role: string, content: any }[]) {
     console.log(data);
     return data;
 }
+
+export async function openrouterEmbeddings(text: string) {
+    const response = await fetch("https://openrouter.ai/api/v1/embeddings", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
+        },
+        body: JSON.stringify({
+            model: "openai/text-embedding-3-small",
+            input: text
+        })
+    })
+
+    const data = await response.json();
+    return data.data[0].embedding;
+}

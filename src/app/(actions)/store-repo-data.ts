@@ -1,4 +1,4 @@
-import { createGithubRepoTable, insertDataInGithubAnalysisRepoData } from "../lib/models/analysis";
+import { createGithubRepoTable, insertDataInGithubAnalysisRepoData, ragDataEmbeddingInsertion } from "../lib/models/analysis";
 
 export async function githubRepoTable() {
     const createTableTest = await createGithubRepoTable()
@@ -22,5 +22,16 @@ export async function saveGithubAnalysisRepoData(parsedAnalysis: any) {
         state: "success",
         message: "data is inserted successfully",
         data: insertRepoData
+    };
+}
+
+export async function storeRagDataEmbedding(chunkData: any, githubRepoUrl: string) {
+
+    const storeRagData = await ragDataEmbeddingInsertion(chunkData, githubRepoUrl);
+
+    return {
+        state: "success",
+        message: "data is inserted successfully",
+        data: storeRagData
     };
 }

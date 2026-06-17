@@ -78,3 +78,40 @@ export async function getAnalysisById(id: number) {
     );
     return result.rows[0] ?? null;
 }
+
+
+export async function createGithubRepoAnalysisChunkVectorTable() {
+    // Enable the pgvector extension just in case it isn't enabled yet
+    await pool.query(`CREATE EXTENSION IF NOT EXISTS vector;`);
+
+    const query = `
+        CREATE TABLE IF NOT EXISTS github_repo_analysis_chunk_vector_data (
+            id SERIAL PRIMARY KEY,
+            repo_url TEXT NOT NULL,
+            chunk TEXT NOT NULL,
+            embedding vector(1536) -- OpenAI text-embedding-3-small outputs 1536 dimensions
+        );
+    `;
+
+    const result = await pool.query(query);
+    return result;
+}
+
+export async function ragDataEmbeddingInsertion(chunkDataArray: any[], githubRepoUrl: string) {
+
+    await createGithubRepoAnalysisChunkVectorTable();
+
+    const chunks = Array.isArray(chunkDataArray) ? chunkDataArray : [chunkDataArray];
+
+    const results = [];
+    for (const chunkData of chunks) {
+        const { content, embedding } = chunkData;
+
+        const query = `INSERT INTO github_repo_analysis_chunk_vector_data(repo_url, chunk, embedding) VALUES ($1, $2, $3)`;
+
+        const result = await pool.query(query, [githubRepoUrl, JSON.stringify(content), JSON.stringify(embedding)]);
+        results.push(result);
+    }
+
+    return results;
+}
