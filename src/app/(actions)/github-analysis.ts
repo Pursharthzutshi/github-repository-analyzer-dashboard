@@ -1,7 +1,5 @@
 'use server';
 
-export const maxDuration = 60; // Allow function to run for up to 60 seconds on Vercel
-
 import { vectorEmbeddingStore } from "../lib/rag/vector-store";
 import { ConnectMCP } from "../mcp/connect-mcp"
 import { saveGithubAnalysisRepoData } from "./store-repo-data";
