@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { Search, ArrowRight } from 'lucide-react';
+import { Search, ArrowRight, Loader2 } from 'lucide-react';
 import './AnalyzeSearchInput.css';
 
-export default function AnalyzeSearchInput({ state, formAction }: { state: any, formAction: any }) {
+export default function AnalyzeSearchInput({ state, formAction, isPending }: { state: any, formAction: any, isPending?: boolean }) {
 
     useEffect(() => {
         if (state.data) {
@@ -23,9 +23,13 @@ export default function AnalyzeSearchInput({ state, formAction }: { state: any, 
                     placeholder="Enter GitHub Repo URL to analyze..."
                     autoComplete="off"
                 />
-                <button type="submit" className="search-button">
-                    <span>Analyze</span>
-                    <ArrowRight size={18} />
+                <button type="submit" className="search-button" disabled={isPending}>
+                    <span>{isPending ? "Analyzing..." : "Analyze"}</span>
+                    {isPending ? (
+                        <Loader2 size={18} className="animate-spin" />
+                    ) : (
+                        <ArrowRight size={18} />
+                    )}
                 </button>
             </div>
         </form>

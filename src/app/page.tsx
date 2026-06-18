@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useState } from "react"
+import { Loader2 } from "lucide-react"
 import AnalyzeSearchInput from "../components/AnalyzeSearchInput"
 import FileExplorer from "../components/HomePage/FileExplorer"
 import GithubRepoOverview from "../components/HomePage/GithubRepoOverview"
@@ -21,7 +22,7 @@ export default function Home() {
         data: null
     }
 
-    const [state, formAction] = useActionState(githubRepoAnalysis, initialState)
+    const [state, formAction, isPending] = useActionState(githubRepoAnalysis, initialState)
     const [displayState, setDisplayState] = useState(initialState)
 
     useEffect(() => {
@@ -56,12 +57,17 @@ export default function Home() {
     return (
         <div className="home">
 
-            <AnalyzeSearchInput state={displayState} formAction={formAction} />
+            <AnalyzeSearchInput state={displayState} formAction={formAction} isPending={isPending} />
 
             <div className="home-layout">
                 <div className="home-main-content">
                     <BoxWrapper flex={2}>
                         <div className="home-page-box">
+                            {isPending && (
+                                <div className="home-box-loading-overlay">
+                                    <Loader2 size={32} className="animate-spin" />
+                                </div>
+                            )}
                             <GithubRepoOverview state={displayState} />
                         </div>
                     </BoxWrapper>
@@ -70,18 +76,33 @@ export default function Home() {
 
                         <BoxWrapper flex={1}>
                             <div className="home-page-box">
+                                {isPending && (
+                                    <div className="home-box-loading-overlay">
+                                        <Loader2 size={32} className="animate-spin" />
+                                    </div>
+                                )}
                                 <FileExplorer state={displayState} />
                             </div>
                         </BoxWrapper>
 
                         <BoxWrapper flex={1}>
                             <div className="home-page-box">
+                                {isPending && (
+                                    <div className="home-box-loading-overlay">
+                                        <Loader2 size={32} className="animate-spin" />
+                                    </div>
+                                )}
                                 Chat
                             </div>
                         </BoxWrapper>
 
                         <BoxWrapper flex={1}>
                             <div className="home-page-box">
+                                {isPending && (
+                                    <div className="home-box-loading-overlay">
+                                        <Loader2 size={32} className="animate-spin" />
+                                    </div>
+                                )}
                                 <SemanticSearch />
                             </div>
                         </BoxWrapper>
@@ -92,18 +113,33 @@ export default function Home() {
 
                         <BoxWrapper flex={1}>
                             <div className="home-page-box">
+                                {isPending && (
+                                    <div className="home-box-loading-overlay">
+                                        <Loader2 size={32} className="animate-spin" />
+                                    </div>
+                                )}
                                 <RepositoryInsights state={displayState} />
                             </div>
                         </BoxWrapper>
 
                         <BoxWrapper flex={1}>
                             <div className="home-page-box">
+                                {isPending && (
+                                    <div className="home-box-loading-overlay">
+                                        <Loader2 size={32} className="animate-spin" />
+                                    </div>
+                                )}
                                 <RepositoryGeneralOverview state={displayState} />
                             </div>
                         </BoxWrapper>
 
                         <BoxWrapper flex={1}>
                             <div className="home-page-box">
+                                {isPending && (
+                                    <div className="home-box-loading-overlay">
+                                        <Loader2 size={32} className="animate-spin" />
+                                    </div>
+                                )}
                                 {/* <RecentQuestions /> */}
                                 <TechStack state={displayState} />
                             </div>
