@@ -1,6 +1,6 @@
 'use server';
 
-import { getAllAnalysis, getAnalysisById } from "../lib/models/analysis";
+import { getAllAnalysis, getAnalysisById, getLatestAnalysis } from "../lib/models/analysis";
 
 export async function fetchAllAnalysis() {
     return await getAllAnalysis();
@@ -9,3 +9,8 @@ export async function fetchAllAnalysis() {
 export async function fetchAnalysisById(id: number) {
     return await getAnalysisById(id);
 }
+
+export async function fetchLatestAnalysis() {
+    return await getLatestAnalysis();
+}
+

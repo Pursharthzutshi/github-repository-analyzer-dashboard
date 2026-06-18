@@ -11,6 +11,7 @@ import TechStack from "../components/HomePage/TechStack"
 import BoxWrapper from "./box-wrapper"
 import githubRepoAnalysis from "./(actions)/github-analysis"
 import { getLatestAnalysisFromStorage, saveAnalysisToStorage } from "./lib/storage"
+import { fetchLatestAnalysis } from "./(actions)/get-analysis"
 import "./home.css"
 import RepositoryGeneralOverview from "../components/HomePage/RepositoryGeneralOverview"
 
@@ -26,10 +27,29 @@ export default function Home() {
     const [displayState, setDisplayState] = useState(initialState)
 
     useEffect(() => {
-        const latest = getLatestAnalysisFromStorage();
-        if (latest) {
-            setDisplayState(latest);
-        }
+        // Commenting out local storage fetch as requested
+        // const latest = getLatestAnalysisFromStorage();
+        // if (latest) {
+        //     setDisplayState(latest);
+        // }
+
+        // Fetching latest data from DB instead
+        fetchLatestAnalysis().then((dbData) => {
+            if (dbData) {
+                setDisplayState({
+                    state: "Success",
+                    message: "Loaded from DB",
+                    data: JSON.stringify({
+                        repo_url: dbData.repo_url,
+                        readme: dbData.readme,
+                        tree: dbData.tree,
+                        packageJson: dbData.packagejson,
+                        insights: dbData.insights,
+                        languages: dbData.languages
+                    })
+                });
+            }
+        }).catch(console.error);
     }, []);
 
     useEffect(() => {
