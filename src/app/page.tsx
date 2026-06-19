@@ -14,6 +14,7 @@ import { getLatestAnalysisFromStorage, saveAnalysisToStorage } from "./lib/stora
 import { fetchLatestAnalysis } from "./(actions)/get-analysis"
 import "./home.css"
 import RepositoryGeneralOverview from "../components/HomePage/RepositoryGeneralOverview"
+import AskRepoQuestions from "./askRepoQuestions/page";
 
 export default function Home() {
 
@@ -112,8 +113,9 @@ export default function Home() {
                                         <Loader2 size={32} className="animate-spin" />
                                     </div>
                                 )}
-                                Chat
+                                <AskRepoQuestions />
                             </div>
+
                         </BoxWrapper>
 
                         <BoxWrapper flex={1}>

@@ -46,13 +46,21 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             }
         }, undefined, { timeout: 120000 })
 
+        const analyzeGithubAskRepoQuestions = client.callTool({
+            name: "call-github-ask-repo-questions",
+            arguments: {
+                githubRepoUrl
+            }
+        }, undefined, { timeout: 120000 })
+
         // Use allSettled so one failing tool doesn't kill the entire analysis
         const results = (await Promise.allSettled([
             analyzeGithubRepoReadmeAnalysis,
             analyzeGithubRepoTreeAnalysis,
             analyzeGithubRepoPackageJSONAnalysis,
             analyzeGithubRepoInsights,
-            analyzeGithubRepoLanguages
+            analyzeGithubRepoLanguages,
+            analyzeGithubAskRepoQuestions
         ])) as any[];
 
         // Safely extract text from each result (null if tool failed)
@@ -71,8 +79,8 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             packageJson: getText(results[2]),
             insights: getText(results[3]),
             languages: getText(results[4]),
+            askRepoQuestions: getText(results[5]),
         };
-
 
 
         console.log("[Analysis] results:", results.map((r, i) => `${i}:${r.status}`).join(" "));
@@ -94,7 +102,8 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             state: "Success",
             message: "Github Repo Analyzed",
             data: JSON.stringify(parsedAnalysis)
-        };
+        }
+
     } catch (error) {
         console.error("Analysis Error:", error);
         return {

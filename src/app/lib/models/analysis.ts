@@ -1,10 +1,10 @@
-"use server";
+// Database models for Github Repo Analyzer
 
 import { Pool } from "pg";
 
 const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
-const pool = new Pool(
+export const pool = new Pool(
     connectionString ? {
         connectionString: connectionString,
         ssl: {

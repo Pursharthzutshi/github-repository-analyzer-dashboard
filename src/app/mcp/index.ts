@@ -2,6 +2,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
 import { z } from "zod"
 import AIprompt from "./ai-prompt";
 import { CallGithubRepo } from "./call-github-repo";
+import { askRagRepoQuestionRetriever } from "../lib/rag/retrievalRag/askRagRepoQuestionRetriever";
+import { openrouter } from "../lib/openrouter/openrouter";
 
 export const server = new McpServer({
     name: "github-repo-analyzer-dashboard",
@@ -20,6 +22,54 @@ server.resource("all-analysis", "analysis://all", async (uri) => {
 
         ]
     }
+})
+
+server.tool("call-github-ask-repo-questions", "give answer to the questions asked by user about repo", {
+    userRepoQuery: z.string(),
+    // questions:
+}, async ({ userRepoQuery }) => {
+
+    const { context, hasContext } = await askRagRepoQuestionRetriever(userRepoQuery)
+
+
+    const finalPrompt = hasContext
+        ? [
+            `You are an expert AI assistant designed to analyze GitHub repositories and answer developer questions about the codebase.`,
+            ``,
+            `You have been given some code snippets, README excerpts, or repository content below that was retrieved as potentially relevant to the user's question.`,
+            ``,
+            `**Your job:**`,
+            `1. First, decide if the retrieved codebase context DIRECTLY and SPECIFICALLY answers the user's question.`,
+            `2. If YES — answer the question using the provided context and explicitly cite the file names or functions if possible.`,
+            `3. If NO (the context is only loosely related, tangential, or off-topic) — ignore the context entirely and answer from your own general programming knowledge. Also gently mention that the exact code for this wasn't found in the retrieved repository chunks.`,
+            ``,
+            `Do NOT force the repository context into your answer if it doesn't directly address the question.`,
+            ``,
+            `---`,
+            `Retrieved Repository Context (may or may not be relevant):`,
+            `${context}`,
+            `---`,
+            ``,
+            `User Question: ${userRepoQuery}`
+        ].join('\n')
+        : [
+            `You are an expert AI assistant analyzing a GitHub repository. The user asked: "${userRepoQuery}"`,
+            ``,
+            `No highly relevant code snippets or repository content were found for this query in the database. Answer using your general programming knowledge, and let the user know that this specific topic does not appear to be covered in the indexed repository files.`
+        ].join('\n');
+
+
+    const aIResponse = await openrouter([{ role: "user", content: finalPrompt }])
+
+    return {
+        content: [
+            {
+                type: "text",
+                text: JSON.stringify({ state: "success", message: aIResponse, data: null })
+            }
+        ]
+    }
+
 })
 
 server.tool("analyze-github-repo-package-json", "analyze the github repo package json", {

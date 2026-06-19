@@ -28,9 +28,14 @@ export default function Leftsidebar() {
                         <FolderGit2 size={24} />
                     </button>
                 </Link>
-                <button className="nav-item" aria-label="Analytics">
-                    <BarChart2 size={24} />
-                </button>
+                <Link href="/analytics">
+                    <button 
+                        className={`nav-item ${pathname === '/analytics' ? 'active' : ''}`} 
+                        aria-label="Analytics"
+                    >
+                        <BarChart2 size={24} />
+                    </button>
+                </Link>
                 <Link href="/onboarding">
                     <button
                         className={`nav-item ${pathname === '/onboarding' ? 'active' : ''}`}
@@ -45,9 +50,14 @@ export default function Leftsidebar() {
                 <button className="nav-item" aria-label="Help">
                     <HelpCircle size={24} />
                 </button>
-                <button className="nav-item" aria-label="Settings">
-                    <Settings size={24} />
-                </button>
+                <Link href="/settings">
+                    <button 
+                        className={`nav-item ${pathname === '/settings' ? 'active' : ''}`} 
+                        aria-label="Settings"
+                    >
+                        <Settings size={24} />
+                    </button>
+                </Link>
             </div>
         </div>
     )
