@@ -1,5 +1,5 @@
-import { useActionState, useEffect, useState } from "react"
-import { Send, Bot, Loader2 } from "lucide-react"
+import { useActionState, useEffect, useState, useRef } from "react"
+import { Send, Bot, Loader2, User } from "lucide-react"
 import repoQuestionsRAG from "../(actions)/repo-questions-rag"
 import "./AskRepoQuestions.css"
 
@@ -8,15 +8,35 @@ export default function AskRepoQuestions() {
     const initialState: any = {
         state: "",
         message: "",
-        data: null
+        data: null,
+        question: ""
     }
 
     const [state, formAction, isPending] = useActionState(repoQuestionsRAG, initialState)
-    const [parsedResponse, setParsedResponse] = useState<string>("");
+    const [chatHistory, setChatHistory] = useState<{question: string, answer: string}[]>([])
+    const chatEndRef = useRef<HTMLDivElement>(null);
+
+    // Load from local storage on mount
+    useEffect(() => {
+        const stored = localStorage.getItem("repo_chat_history");
+        if (stored) {
+            try {
+                setChatHistory(JSON.parse(stored));
+            } catch (e) {
+                console.error("Failed to load chat history", e);
+            }
+        }
+    }, [])
+
+    // Scroll to bottom when history changes or pending
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chatHistory, isPending]);
 
     useEffect(() => {
-        if (state?.data) {
+        if (state?.state === "Success" && state?.data && state?.question) {
             try {
+                let parsedResponse = "";
                 // Parse the outer MCP JSON wrapper
                 const outer = JSON.parse(state.data);
                 if (outer?.content?.[0]?.text) {
@@ -29,15 +49,28 @@ export default function AskRepoQuestions() {
                         if (typeof text === 'object' && text?.choices) {
                             text = text.choices[0]?.message?.content;
                         }
-                        setParsedResponse(text || "No response generated");
+                        parsedResponse = text || "No response generated";
                     } catch {
                         // If it's not JSON, just display the raw text
-                        setParsedResponse(outer.content[0].text);
+                        parsedResponse = outer.content[0].text;
                     }
                 }
+                
+                // Add to history and save to local storage
+                if (parsedResponse) {
+                    const newEntry = { question: state.question, answer: parsedResponse };
+                    setChatHistory(prev => {
+                        // Prevent duplicate updates from React Strict Mode double-invocations
+                        if (prev.length > 0 && prev[prev.length - 1].question === newEntry.question && prev[prev.length - 1].answer === newEntry.answer) {
+                            return prev;
+                        }
+                        const newHistory = [...prev, newEntry];
+                        localStorage.setItem("repo_chat_history", JSON.stringify(newHistory));
+                        return newHistory;
+                    });
+                }
             } catch (e) {
-                setParsedResponse("Failed to parse the AI response.");
-                console.error(e);
+                console.error("Failed to parse the AI response.", e);
             }
         }
     }, [state])
@@ -50,20 +83,50 @@ export default function AskRepoQuestions() {
             </div>
 
             <div className="ask-repo-chat-area">
-                {parsedResponse ? (
-                    <div className="ask-repo-message assistant-message">
-                        <Bot size={18} className="message-icon" />
-                        <div className="message-content">{parsedResponse}</div>
+                {chatHistory.length > 0 ? (
+                    <div className="ask-repo-chat-list">
+                        {chatHistory.map((chat, idx) => (
+                            <div key={idx} className="ask-repo-chat-pair">
+                                <div className="ask-repo-message user-message">
+                                    <div className="message-content">{chat.question}</div>
+                                    <User size={18} className="message-icon user-icon" />
+                                </div>
+                                <div className="ask-repo-message assistant-message">
+                                    <Bot size={18} className="message-icon bot-icon" />
+                                    <div className="message-content">{chat.answer}</div>
+                                </div>
+                            </div>
+                        ))}
+                        {isPending && (
+                            <div className="ask-repo-message assistant-message pending-message">
+                                <Loader2 size={18} className="message-icon bot-icon animate-spin" />
+                                <div className="message-content typing-indicator">Thinking...</div>
+                            </div>
+                        )}
+                        <div ref={chatEndRef} />
                     </div>
                 ) : (
                     <div className="ask-repo-empty-state">
-                        <Bot size={32} className="empty-icon" />
-                        <p>Ask a question to search the codebase.</p>
+                        {isPending ? (
+                            <>
+                                <Loader2 size={32} className="empty-icon animate-spin" />
+                                <p>Searching the repository...</p>
+                            </>
+                        ) : (
+                            <>
+                                <Bot size={32} className="empty-icon" />
+                                <p>Ask a question to search the codebase.</p>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
 
-            <form action={formAction} className="ask-repo-form">
+            <form action={(formData) => {
+                const form = document.querySelector('.ask-repo-form') as HTMLFormElement;
+                formAction(formData);
+                if (form) form.reset(); // clear input after submitting
+            }} className="ask-repo-form">
                 <input 
                     type="text" 
                     name="user-repo-query" 
@@ -71,6 +134,7 @@ export default function AskRepoQuestions() {
                     className="ask-repo-input"
                     required
                     disabled={isPending}
+                    autoComplete="off"
                 />
                 <button type="submit" className="ask-repo-submit" disabled={isPending}>
                     {isPending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}

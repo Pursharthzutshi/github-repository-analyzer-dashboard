@@ -21,7 +21,8 @@ export default async function repoQuestionsRAG(_prevState: any, formData: FormDa
         return {
             state: "Success",
             message: "Github Repo Analyzed",
-            data: JSON.stringify(analyzeGithubAskRepoQuestions)
+            data: JSON.stringify(analyzeGithubAskRepoQuestions),
+            question: userRepoQuery
         }
 
     } catch (error) {
