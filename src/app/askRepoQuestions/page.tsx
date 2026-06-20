@@ -1,3 +1,5 @@
+"use client"
+
 import { useActionState, useEffect, useState, useRef } from "react"
 import { Send, Bot, Loader2, User } from "lucide-react"
 import repoQuestionsRAG from "../(actions)/repo-questions-rag"
