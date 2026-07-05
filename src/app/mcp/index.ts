@@ -24,6 +24,21 @@ server.resource("all-analysis", "analysis://all", async (uri) => {
     }
 })
 
+
+server.tool("semantic-search-rag", "Do a thorough semantic search", {
+    userRepoQuery: z.string(),
+}, async ({ userRepoQuery }) => {
+    const { context, hasContext, chunks } = await askRagRepoQuestionRetriever(userRepoQuery);
+    return {
+        content: [
+            {
+                type: "text",
+                text: JSON.stringify({ context, hasContext, chunks })
+            }
+        ]
+    };
+})
+
 server.tool("call-github-ask-repo-questions", "give answer to the questions asked by user about repo", {
     userRepoQuery: z.string(),
     // questions:

@@ -15,5 +15,5 @@ export function combineHybridSearch(vectorResults, textResults) {
 
     const hasContext = context.trim().length > 0;
 
-    return { context, hasContext }
+    return { context, hasContext, chunks: hybridSearchCombined }
 }

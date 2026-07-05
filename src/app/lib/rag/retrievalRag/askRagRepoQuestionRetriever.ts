@@ -17,9 +17,9 @@ export async function askRagRepoQuestionRetriever(userRepoQuery: string) {
 
     const { vectorResults, textResults } = await hybridSearchQueries(userRepoQueryEmbedding, userRepoQuery)
 
-    const { context, hasContext } = combineHybridSearch(vectorResults, textResults)
+    const { context, hasContext, chunks } = combineHybridSearch(vectorResults, textResults)
 
     return {
-        context, hasContext
+        context, hasContext, chunks
     }
 }
