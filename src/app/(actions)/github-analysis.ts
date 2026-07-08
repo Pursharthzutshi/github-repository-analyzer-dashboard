@@ -46,13 +46,6 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             }
         }, undefined, { timeout: 120000 })
 
-        const analyzeGithubAskRepoQuestions = client.callTool({
-            name: "call-github-ask-repo-questions",
-            arguments: {
-                githubRepoUrl
-            }
-        }, undefined, { timeout: 120000 })
-
         // Use allSettled so one failing tool doesn't kill the entire analysis
         const results = (await Promise.allSettled([
             analyzeGithubRepoReadmeAnalysis,
@@ -60,16 +53,16 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             analyzeGithubRepoPackageJSONAnalysis,
             analyzeGithubRepoInsights,
             analyzeGithubRepoLanguages,
-            analyzeGithubAskRepoQuestions
         ])) as any[];
 
         // Safely extract text from each result (null if tool failed)
         const getText = (r: PromiseSettledResult<any>) =>
             r.status === "fulfilled" ? (r.value?.content?.[0]?.text || "") : "";
 
-        if (results[0].status === "rejected" && results[1].status === "rejected") {
-            // Core tools failed — surface the error
-            throw new Error("Core analysis tools failed. Check console for details.");
+        const allFailed = results.every(r => r.status === "rejected");
+        if (allFailed) {
+            const firstError = (results[0] as PromiseRejectedResult).reason;
+            throw new Error(`All analysis tools failed: ${firstError?.message || firstError}`);
         }
 
         const parsedAnalysis = {
@@ -79,9 +72,7 @@ export default async function githubRepoAnalysis(_prevState: any, formData: Form
             packageJson: getText(results[2]),
             insights: getText(results[3]),
             languages: getText(results[4]),
-            askRepoQuestions: getText(results[5]),
         };
-
 
         console.log("[Analysis] results:", results.map((r, i) => `${i}:${r.status}`).join(" "));
 

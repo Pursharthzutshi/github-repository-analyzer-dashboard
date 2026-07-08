@@ -5,10 +5,13 @@ import { CallGithubRepo } from "./call-github-repo";
 import { askRagRepoQuestionRetriever } from "../lib/rag/retrievalRag/askRagRepoQuestionRetriever";
 import { openrouter } from "../lib/openrouter/openrouter";
 
-export const server = new McpServer({
-    name: "github-repo-analyzer-dashboard",
-    version: "1.0.0",
-})
+/**
+ * Registers all MCP tools onto the provided server instance.
+ * Called once per request from ConnectMCP() with a fresh McpServer.
+ * This avoids the "Server already started" error when reusing a singleton
+ * across multiple requests (especially on Vercel serverless).
+ */
+export function registerMcpTools(server: McpServer) {
 
 server.resource("all-analysis", "analysis://all", async (uri) => {
 
@@ -240,4 +243,6 @@ server.tool("analyze-github-repo-readme", "analyze the github repo and return in
         ]
     }
 
-})
+}) // end analyze-github-repo-readme
+
+} // end registerMcpTools
