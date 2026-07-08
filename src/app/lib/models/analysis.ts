@@ -108,6 +108,7 @@ export async function createGithubRepoAnalysisChunkVectorTable() {
             id SERIAL PRIMARY KEY,
             repo_url TEXT NOT NULL,
             chunk TEXT NOT NULL,
+            metadata JSONB DEFAULT '{}',
             embedding vector(1536) -- OpenAI text-embedding-3-small outputs 1536 dimensions
         );
     `;
@@ -124,13 +125,25 @@ export async function ragDataEmbeddingInsertion(chunkDataArray: any[], githubRep
 
     const results = [];
     for (const chunkData of chunks) {
-        const { content, embedding } = chunkData;
+        const { content, metadata, embedding } = chunkData;
 
-        const query = `INSERT INTO github_repo_analysis_chunk_vector_data(repo_url, chunk, embedding) VALUES ($1, $2, $3)`;
+        const query = `INSERT INTO github_repo_analysis_chunk_vector_data(repo_url, chunk, metadata, embedding) VALUES ($1, $2, $3, $4)`;
 
-        const result = await pool.query(query, [githubRepoUrl, JSON.stringify(content), JSON.stringify(embedding)]);
+        const result = await pool.query(query, [
+            githubRepoUrl,
+            JSON.stringify(content),
+            JSON.stringify(metadata || {}),
+            JSON.stringify(embedding)
+        ]);
         results.push(result);
     }
 
     return results;
+}
+
+export async function deleteChunksByRepoUrl(githubRepoUrl: string) {
+    await pool.query(
+        `DELETE FROM github_repo_analysis_chunk_vector_data WHERE repo_url = $1`,
+        [githubRepoUrl]
+    );
 }

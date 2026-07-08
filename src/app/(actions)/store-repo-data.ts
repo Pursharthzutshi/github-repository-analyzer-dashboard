@@ -1,4 +1,4 @@
-import { createGithubRepoTable, insertDataInGithubAnalysisRepoData, ragDataEmbeddingInsertion } from "../lib/models/analysis";
+import { createGithubRepoTable, insertDataInGithubAnalysisRepoData, ragDataEmbeddingInsertion, deleteChunksByRepoUrl } from "../lib/models/analysis";
 
 export async function githubRepoTable() {
     const createTableTest = await createGithubRepoTable()
@@ -34,4 +34,9 @@ export async function storeRagDataEmbedding(chunkData: any, githubRepoUrl: strin
         message: "data is inserted successfully",
         data: storeRagData
     };
+}
+
+export async function clearRagDataForRepo(githubRepoUrl: string) {
+    await deleteChunksByRepoUrl(githubRepoUrl);
+    return { state: "success", message: "chunks cleared" };
 }
