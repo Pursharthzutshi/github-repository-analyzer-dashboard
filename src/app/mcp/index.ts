@@ -28,24 +28,39 @@ server.resource("all-analysis", "analysis://all", async (uri) => {
 server.tool("semantic-search-rag", "Do a thorough semantic search", {
     userRepoQuery: z.string(),
 }, async ({ userRepoQuery }) => {
-    const { context, hasContext, chunks } = await askRagRepoQuestionRetriever(userRepoQuery);
-    return {
-        content: [
-            {
-                type: "text",
-                text: JSON.stringify({ context, hasContext, chunks })
-            }
-        ]
-    };
+    try {
+        const { context, hasContext, chunks } = await askRagRepoQuestionRetriever(userRepoQuery);
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: JSON.stringify({ context, hasContext, chunks })
+                }
+            ]
+        };
+    } catch (err: any) {
+        console.error("[semantic-search-rag] Error:", err?.message || err);
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: JSON.stringify({ context: "", hasContext: false, chunks: [], error: err?.message || "Search failed" })
+                }
+            ]
+        };
+    }
 })
 
 server.tool("call-github-ask-repo-questions", "give answer to the questions asked by user about repo", {
     userRepoQuery: z.string(),
-    // questions:
 }, async ({ userRepoQuery }) => {
 
     const { context, hasContext } = await askRagRepoQuestionRetriever(userRepoQuery)
 
+    // Truncate context to avoid excessive token usage (~3000 chars ≈ ~750 tokens)
+    const truncatedContext = context.length > 3000
+        ? context.slice(0, 3000) + "\n\n[...context truncated for brevity...]"
+        : context;
 
     const finalPrompt = hasContext
         ? [
@@ -58,11 +73,11 @@ server.tool("call-github-ask-repo-questions", "give answer to the questions aske
             `2. If YES — answer the question using the provided context and explicitly cite the file names or functions if possible.`,
             `3. If NO (the context is only loosely related, tangential, or off-topic) — ignore the context entirely and answer from your own general programming knowledge. Also gently mention that the exact code for this wasn't found in the retrieved repository chunks.`,
             ``,
-            `Do NOT force the repository context into your answer if it doesn't directly address the question.`,
+            `Do NOT force the repository context into your answer if it doesn't directly address the question. Keep your answer concise.`,
             ``,
             `---`,
             `Retrieved Repository Context (may or may not be relevant):`,
-            `${context}`,
+            `${truncatedContext}`,
             `---`,
             ``,
             `User Question: ${userRepoQuery}`
@@ -70,7 +85,7 @@ server.tool("call-github-ask-repo-questions", "give answer to the questions aske
         : [
             `You are an expert AI assistant analyzing a GitHub repository. The user asked: "${userRepoQuery}"`,
             ``,
-            `No highly relevant code snippets or repository content were found for this query in the database. Answer using your general programming knowledge, and let the user know that this specific topic does not appear to be covered in the indexed repository files.`
+            `No highly relevant code snippets or repository content were found for this query in the database. Answer using your general programming knowledge, and let the user know that this specific topic does not appear to be covered in the indexed repository files. Keep your answer concise.`
         ].join('\n');
 
 

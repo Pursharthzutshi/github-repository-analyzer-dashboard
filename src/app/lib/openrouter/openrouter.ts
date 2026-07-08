@@ -7,7 +7,9 @@ export async function openrouter(messages: { role: string, content: any }[]) {
         },
         body: JSON.stringify({
             model: "openai/gpt-4o-mini",
-            messages: messages
+            messages: messages,
+            max_tokens: 1024,
+            temperature: 0.3
         })
     })
 

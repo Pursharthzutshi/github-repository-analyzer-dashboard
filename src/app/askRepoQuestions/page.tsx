@@ -23,7 +23,13 @@ export default function AskRepoQuestions() {
         const stored = localStorage.getItem("repo_chat_history");
         if (stored) {
             try {
-                setChatHistory(JSON.parse(stored));
+                const parsed = JSON.parse(stored);
+                // Sanitize: ensure every answer is a string (guard against stale object values)
+                const sanitized = parsed.map((entry: any) => ({
+                    question: typeof entry.question === "string" ? entry.question : String(entry.question ?? ""),
+                    answer: typeof entry.answer === "string" ? entry.answer : (entry.answer ? `[Stored error: ${JSON.stringify(entry.answer)}]` : "No response")
+                }));
+                setChatHistory(sanitized);
             } catch (e) {
                 console.error("Failed to load chat history", e);
             }
@@ -41,17 +47,34 @@ export default function AskRepoQuestions() {
                 let parsedResponse = "";
                 // Parse the outer MCP JSON wrapper
                 const outer = JSON.parse(state.data);
-                if (outer?.content?.[0]?.text) {
+
+                // OpenRouter/MCP returned a top-level error object e.g. { error: {...}, user_id: "..." }
+                if (outer?.error) {
+                    const errMsg = typeof outer.error === "object"
+                        ? (outer.error.message || JSON.stringify(outer.error))
+                        : String(outer.error);
+                    parsedResponse = `⚠️ API Error: ${errMsg}`;
+                } else if (outer?.content?.[0]?.text) {
                     // Try to parse the inner text response
                     try {
                         const inner = JSON.parse(outer.content[0].text);
-                        let text = inner?.message;
-                        
-                        // If it's a nested openrouter object, extract the content
-                        if (typeof text === 'object' && text?.choices) {
-                            text = text.choices[0]?.message?.content;
+
+                        // Inner payload is also an error object
+                        if (inner?.error) {
+                            const errMsg = typeof inner.error === "object"
+                                ? (inner.error.message || JSON.stringify(inner.error))
+                                : String(inner.error);
+                            parsedResponse = `⚠️ API Error: ${errMsg}`;
+                        } else {
+                            let text = inner?.message;
+                            
+                            // If it's a nested openrouter object, extract the content
+                            if (typeof text === 'object' && text?.choices) {
+                                text = text.choices[0]?.message?.content;
+                            }
+                            // Ensure it's always a string
+                            parsedResponse = typeof text === "string" ? text : (text ? JSON.stringify(text) : "No response generated");
                         }
-                        parsedResponse = text || "No response generated";
                     } catch {
                         // If it's not JSON, just display the raw text
                         parsedResponse = outer.content[0].text;

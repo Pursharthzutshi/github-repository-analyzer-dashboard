@@ -24,10 +24,14 @@ function formatSnippet(item: any): string {
         try {
             const parsed = JSON.parse(raw);
             if (typeof parsed === "string") return parsed;
+            // parsed is an object — stringify it so it's always a string
+            return JSON.stringify(parsed, null, 2);
         } catch {
             return raw;
         }
     }
+    // raw is already an object — safely convert to string
+    if (typeof raw === "object") return JSON.stringify(raw, null, 2);
     return String(raw);
 }
 
@@ -50,9 +54,30 @@ export default function SemanticSearch() {
             try {
                 const outer = JSON.parse(state.data);
                 console.log("[SemanticSearch] outer:", outer);
+
+                // MCP tool returned a top-level error object, e.g. { error: "...", user_id: "..." }
+                if (outer?.error) {
+                    console.error("[SemanticSearch] MCP error:", outer.error);
+                    setResults([]);
+                    return;
+                }
+
                 if (outer?.content?.[0]?.text) {
-                    const inner = JSON.parse(outer.content[0].text);
+                    let inner: any;
+                    try {
+                        inner = JSON.parse(outer.content[0].text);
+                    } catch {
+                        // content text is not JSON — treat it as plain context
+                        inner = { context: outer.content[0].text };
+                    }
                     console.log("[SemanticSearch] inner:", inner);
+
+                    // If the inner payload itself is an error
+                    if (inner?.error) {
+                        console.error("[SemanticSearch] inner error:", inner.error);
+                        setResults([]);
+                        return;
+                    }
                     if (inner?.chunks && Array.isArray(inner.chunks) && inner.chunks.length > 0) {
                         const parsedResults: SearchResult[] = inner.chunks.map((item: any, idx: number) => {
                             let file = `Section #${idx + 1}`;
@@ -94,7 +119,7 @@ export default function SemanticSearch() {
                 console.error("[SemanticSearch] parse error", e);
                 setResults([]);
             }
-        } else if (state?.state === "error") {
+        } else if (state?.state === "error" || state?.state === "Failed") {
             setResults([]);
         }
     }, [state]);
