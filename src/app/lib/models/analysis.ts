@@ -103,19 +103,24 @@ export async function createGithubRepoAnalysisChunkVectorTable() {
     // Enable the pgvector extension just in case it isn't enabled yet
     await pool.query(`CREATE EXTENSION IF NOT EXISTS vector;`);
 
-    const query = `
+    // Create the table if it doesn't exist yet
+    await pool.query(`
         CREATE TABLE IF NOT EXISTS github_repo_analysis_chunk_vector_data (
             id SERIAL PRIMARY KEY,
             repo_url TEXT NOT NULL,
             chunk TEXT NOT NULL,
-            metadata JSONB DEFAULT '{}',
-            embedding vector(1536) -- OpenAI text-embedding-3-small outputs 1536 dimensions
+            embedding vector(1536)
         );
-    `;
+    `);
 
-    const result = await pool.query(query);
-    return result;
+    // Migrate existing tables: add the metadata column if it doesn't exist yet.
+    // (ALTER TABLE ... ADD COLUMN IF NOT EXISTS is safe to run repeatedly)
+    await pool.query(`
+        ALTER TABLE github_repo_analysis_chunk_vector_data
+        ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}';
+    `);
 }
+
 
 export async function ragDataEmbeddingInsertion(chunkDataArray: any[], githubRepoUrl: string) {
 
