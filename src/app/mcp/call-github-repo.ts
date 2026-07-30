@@ -6,7 +6,8 @@ export async function CallGithubRepo(githubRepoUrl: string) {
         if (url.hostname === "github.com") {
             const pathParts = url.pathname.split("/").filter(Boolean);
             if (pathParts.length >= 2) {
-                apiUrl = `https://api.github.com/repos/${pathParts[0]}/${pathParts[1]}`;
+                const repoName = pathParts[1].replace(/\.git$/, "");
+                apiUrl = `https://api.github.com/repos/${pathParts[0]}/${repoName}`;
             } else if (pathParts.length === 1) {
                 // Organization URL — not a repo URL
                 throw new Error(

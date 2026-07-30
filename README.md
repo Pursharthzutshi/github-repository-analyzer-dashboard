@@ -1,148 +1,242 @@
-# 🔍 GitAnalyzer — GitHub Repository Analyzer Dashboard
+# GitHub Repo Analyzer Dashboard
 
-> An AI-powered dashboard that analyzes any public GitHub repository and lets you explore, ask questions, and semantically search through the codebase using RAG (Retrieval-Augmented Generation).
-
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6-blue?logo=typescript)](https://www.typescriptlang.org)
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://github-repository-analyzer-dashboar-azure.vercel.app)
-[![OpenRouter](https://img.shields.io/badge/LLM-OpenRouter%20%2F%20GPT--4o--mini-orange)](https://openrouter.ai)
-[![pgvector](https://img.shields.io/badge/Vector%20DB-PostgreSQL%20%2B%20pgvector-336791?logo=postgresql)](https://github.com/pgvector/pgvector)
+> An AI-powered dashboard that deeply analyzes any public GitHub repository — surfacing architecture insights, tech stack breakdowns, repository stats, and letting you ask natural-language questions about the codebase using a Retrieval-Augmented Generation (RAG) pipeline.
 
 ---
 
-## 🌐 Live Demo
+## What This Project Does
 
-**[github-repository-analyzer-dashboar-azure.vercel.app](https://github-repository-analyzer-dashboar-azure.vercel.app)**
+Paste any public GitHub repository URL and the dashboard instantly:
 
----
-
-## ✨ What It Does
-
-Paste any public GitHub repository URL and GitAnalyzer will:
-
-1. **Analyze the repository** — fetches README, file tree, package.json, stats, and language breakdown in parallel
-2. **Generate an AI overview** — uses GPT-4o-mini to summarize the README and file structure
-3. **Store everything in PostgreSQL** — persists analysis results for fast reload
-4. **Build a searchable vector index** — chunks and embeds README + file tree + package analysis using `text-embedding-3-small`
-5. **Let you ask natural-language questions** — RAG-powered Q&A over the actual codebase content
-6. **Semantic search** — hybrid vector + full-text search to find relevant code sections by concept
+1. **Fetches & analyzes the repo** — README, file tree, `package.json`, contributor stats, and language breakdown — all in parallel via an MCP (Model Context Protocol) server.
+2. **Generates AI insights** — A Senior Engineer-level AI summary of architecture, dependencies, and file structure using an OpenRouter-backed LLM.
+3. **Embeds repo content into a vector database** — The README, file tree, and package.json analysis are chunked with LangChain's `MarkdownTextSplitter` and embedded using Google Generative AI, then stored in PostgreSQL with the `pgvector` extension.
+4. **Lets you ask questions about the codebase** — A RAG pipeline does a hybrid search (vector similarity + full-text) over the stored chunks and feeds the most relevant context to the LLM to answer your questions accurately.
+5. **Semantic search** — Directly search repository content using natural-language similarity queries, returning the raw matching chunks.
 
 ---
 
-## 🧩 Features
+## Key Features
 
 | Feature | Description |
-|---------|-------------|
-| 🔎 **Repo Analysis** | Fetches and AI-analyzes README, file tree, package.json, languages and GitHub stats |
-| 🤖 **Ask Repository** | Chat-style Q&A — ask anything about the codebase, answered using RAG context |
-| 🧠 **Semantic Search** | Search by concept (e.g. "authentication flow", "database setup") using vector embeddings |
-| 📁 **File Explorer** | Browse the repository tree structure visually |
-| 📊 **Repository Insights** | Stars, forks, watchers, license, open issues with a donut chart language breakdown |
-| 📦 **Package Analysis** | Dependency table with npm links for all detected packages |
-| 🗂️ **Recent Analysis** | Load previously analyzed repositories instantly from the database |
-| 💾 **Persistent Storage** | All analyses saved to PostgreSQL — no re-analysis needed on revisit |
+|---|---|
+| 🔍 **Repo Overview** | AI-generated summary of what the repo does, who owns it, and its purpose |
+| 🗂 **File Explorer** | Interactive tree view of the repository's full file structure |
+| 📦 **Tech Stack** | Language breakdown with byte counts and percentages |
+| 📊 **Repository Insights** | Stars, forks, watchers, open issues, license, visibility, and timestamps |
+| 🤖 **Ask AI Questions** | RAG-powered Q&A — ask anything about the codebase in plain English |
+| 🔎 **Semantic Search** | Embedding-based similarity search over the repo content chunks |
+| 💾 **Persistent Storage** | Analysis results and embeddings are persisted in PostgreSQL for instant re-loading |
+| 🔄 **History** | Browse previously analyzed repositories from the sidebar |
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        Next.js App                          │
-│                                                             │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
-│  │  Server      │    │  MCP Server  │    │  RAG Engine  │  │
-│  │  Actions     │───▶│  (In-Memory) │───▶│              │  │
-│  │  (use server)│    │              │    │  Embeddings  │  │
-│  └──────────────┘    └──────────────┘    │  + pgvector  │  │
-│         │                   │            └──────────────┘  │
-│         ▼                   ▼                   │           │
-│  ┌──────────────┐    ┌──────────────┐           │           │
-│  │  GitHub API  │    │  OpenRouter  │           │           │
-│  │  (REST)      │    │  GPT-4o-mini │           ▼           │
-│  └──────────────┘    └──────────────┘    ┌──────────────┐  │
-│                                          │  PostgreSQL  │  │
-│                                          │  + pgvector  │  │
-│                                          └──────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+User enters GitHub URL
+        │
+        ▼
+┌───────────────────┐
+│   Next.js App     │  (React 19, Server Actions, useActionState)
+│   /src/app        │
+└────────┬──────────┘
+         │ Server Action: githubRepoAnalysis()
+         ▼
+┌───────────────────────────────────────────────┐
+│              MCP Server (in-process)          │
+│  ┌──────────────────────────────────────────┐ │
+│  │  analyze-github-repo-readme              │ │
+│  │  analyze-github-repo-tree                │ │  ← Parallel via Promise.allSettled()
+│  │  analyze-github-repo-package-json        │ │
+│  │  analyze-github-repo-insights            │ │
+│  │  analyze-github-repo-languages           │ │
+│  └──────────────────────────────────────────┘ │
+│           │ GitHub REST API + OpenRouter LLM  │
+└───────────┼───────────────────────────────────┘
+            │
+     ┌──────┴──────┐
+     │             │
+     ▼             ▼
+PostgreSQL     pgvector table
+(raw data)     (chunked embeddings)
+     │             │
+     └──────┬──────┘
+            │
+            ▼
+┌───────────────────────────────┐
+│   RAG Retrieval Pipeline      │
+│  Hybrid Search:               │
+│  • Vector similarity (ANN)    │
+│  • Full-text (tsvector)       │
+│  • Filtered by latest repo    │
+└───────────────────────────────┘
+            │
+            ▼
+      OpenRouter LLM
+   (final AI answer)
 ```
-
-### Key Design Decisions
-
-- **MCP (Model Context Protocol)** — All AI tool calls are wrapped in an MCP server, making them composable and replaceable
-- **Fresh MCP instance per request** — Avoids "server already started" errors on Vercel serverless (each request creates a new `McpServer`)
-- **Hybrid Search** — Combines pgvector cosine similarity with PostgreSQL full-text search (`tsvector`) for better RAG recall
-- **Repo-scoped search** — All vector searches are scoped to the latest analyzed repo URL to avoid mixing results across repos
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| **Framework** | [Next.js 15](https://nextjs.org) (App Router, Server Actions) |
-| **Language** | TypeScript 6 |
-| **LLM** | [OpenRouter](https://openrouter.ai) → `openai/gpt-4o-mini` |
-| **Embeddings** | OpenRouter → `openai/text-embedding-3-small` (1536 dims) |
-| **Vector DB** | PostgreSQL + [pgvector](https://github.com/pgvector/pgvector) |
-| **Text Splitting** | `@langchain/textsplitters` (MarkdownTextSplitter) |
-| **AI Protocol** | [Model Context Protocol SDK](https://github.com/modelcontextprotocol/sdk) |
-| **Styling** | Vanilla CSS (dark theme, glassmorphism) |
-| **Icons** | [Lucide React](https://lucide.dev) |
-| **Deployment** | [Vercel](https://vercel.com) |
+|---|---|
+| **Framework** | [Next.js 15](https://nextjs.org/) (App Router, Server Actions) |
+| **Language** | TypeScript |
+| **UI** | React 19, Vanilla CSS |
+| **Icons** | Lucide React |
+| **Markdown rendering** | `react-markdown` |
+| **AI / LLM** | [OpenRouter](https://openrouter.ai/) (configurable model) |
+| **Embeddings** | Google Generative AI (`@google/generative-ai`) |
+| **Vector store** | PostgreSQL + [`pgvector`](https://github.com/pgvector/pgvector) |
+| **Database client** | `pg` (node-postgres) |
+| **Text chunking** | LangChain `MarkdownTextSplitter` (`@langchain/textsplitters`) |
+| **Tool protocol** | Model Context Protocol SDK (`@modelcontextprotocol/sdk`) |
+| **External API** | GitHub REST API (public, unauthenticated) |
+| **Deployment** | [Vercel](https://vercel.com/) |
 
 ---
 
-## 🚀 Getting Started
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (actions)/               # Next.js Server Actions
+│   │   ├── github-analysis.ts   # Main analysis action — calls all MCP tools in parallel
+│   │   ├── repo-questions-rag.ts# RAG Q&A action — calls MCP ask-questions tool
+│   │   ├── repo-semantic-find-questions.rag.ts  # Semantic search action
+│   │   ├── store-repo-data.ts   # Persists analysis + embeddings to PostgreSQL
+│   │   └── get-analysis.ts      # Fetches latest analysis from DB on page load
+│   ├── lib/
+│   │   ├── models/
+│   │   │   └── analysis.ts      # PostgreSQL pool + all DB table schemas & queries
+│   │   ├── rag/
+│   │   │   ├── vector-store.ts  # Chunks content & stores embeddings (Google AI)
+│   │   │   ├── embeddings.ts    # Google Generative AI embedding wrapper
+│   │   │   └── retrievalRag/
+│   │   │       ├── hybridSearchQueries.ts       # pgvector ANN + tsvector full-text search
+│   │   │       └── askRagRepoQuestionRetriever.ts  # Merges results, deduplicates, ranks
+│   │   ├── openrouter/          # OpenRouter LLM API client
+│   │   └── storage.ts           # localStorage utility for client-side caching
+│   ├── mcp/
+│   │   ├── index.ts             # All MCP tool registrations (analyze, ask, search)
+│   │   ├── connect-mcp.ts       # Creates a fresh McpServer per request (serverless-safe)
+│   │   ├── call-github-repo.ts  # GitHub REST API wrapper (owner/repo parsing, metadata)
+│   │   └── ai-prompt.ts         # Shared AI prompt builder for OpenRouter calls
+│   ├── analytics/               # Analytics page (repo history)
+│   ├── askRepoQuestions/        # Ask AI page route
+│   ├── repositories/            # Repositories browser page
+│   └── page.tsx                 # Home dashboard — orchestrates all widgets
+├── components/
+│   ├── HomePage/
+│   │   ├── GithubRepoOverview.tsx       # AI-generated repo summary panel
+│   │   ├── FileExplorer.tsx             # Interactive file tree viewer
+│   │   ├── RepositoryInsights.tsx       # Stars, forks, issues, license stats
+│   │   ├── RepositoryGeneralOverview.tsx# General overview card
+│   │   ├── TechStack.tsx                # Language breakdown with percentages
+│   │   └── SemanticSearch.tsx           # Semantic search widget
+│   ├── AnalyzeSearchInput.tsx   # URL input form + submit
+│   ├── Navbar.tsx               # Top navigation bar
+│   └── Leftsidebar.tsx          # Sidebar with repo history
+└── index.css / App.css          # Global styles
+```
+
+---
+
+## Database Schema
+
+### `github_repo_analysis_data`
+Stores the raw analysis results for each repository.
+
+| Column | Type | Description |
+|---|---|---|
+| `id` | SERIAL | Primary key |
+| `repo_url` | TEXT | Full GitHub repository URL |
+| `readme` | TEXT | AI-analysed README content |
+| `tree` | TEXT | AI-analysed file tree |
+| `packageJson` | TEXT | AI-analysed package.json |
+| `insights` | TEXT | Raw stats JSON (stars, forks, etc.) |
+| `languages` | TEXT | Language breakdown JSON |
+| `analyzed_at` | TIMESTAMPTZ | Timestamp of analysis |
+
+### `github_repo_analysis_chunk_vector_data`
+Stores chunked, embedded content for RAG retrieval.
+
+| Column | Type | Description |
+|---|---|---|
+| `id` | SERIAL | Primary key |
+| `repo_url` | TEXT | Source repository URL |
+| `chunk` | TEXT | Text chunk content |
+| `embedding` | vector(1536) | Google AI embedding |
+| `metadata` | JSONB | Source section label + repo_url |
+
+---
+
+## RAG Pipeline (How AI Q&A Works)
+
+1. **Ingestion** — When a repo is analyzed, the README, file tree, and package.json analysis are split into 1000-character chunks (with 100-character overlap) using LangChain's `MarkdownTextSplitter`.
+2. **Embedding** — Each chunk is embedded into a 1536-dimensional vector using Google Generative AI and stored in the `pgvector` table. Old chunks for the same repo are deleted first to prevent stale data.
+3. **Retrieval (Hybrid Search)** — On a user question, two queries run in parallel:
+   - **Vector search**: Approximate nearest-neighbor (`<=>` cosine distance) on the `embedding` column, filtered to the latest analyzed repo.
+   - **Full-text search**: PostgreSQL `tsvector` / `plainto_tsquery` match on the `chunk` column.
+4. **Ranking** — Results from both searches are merged, deduplicated by content, and ranked by similarity score.
+5. **Generation** — The top-ranked chunks are passed as context to the OpenRouter LLM, which generates a final answer grounded in the actual repository content.
+
+---
+
+## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL database with `pgvector` extension enabled
-- [OpenRouter](https://openrouter.ai) API key (for LLM + embeddings)
+- A PostgreSQL database with the [`pgvector`](https://github.com/pgvector/pgvector) extension enabled
+- API keys for OpenRouter and Google Generative AI
 
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/Pursharthzutshi/github-repository-analyzer-dashboard.git
-cd github-repository-analyzer-dashboard
-```
-
-### 2. Install dependencies
+### 1. Clone and install
 
 ```bash
+git clone https://github.com/your-username/github-repo-analyzer-dashboard.git
+cd github-repo-analyzer-dashboard
 npm install
 ```
 
-### 3. Set up environment variables
+### 2. Configure environment variables
 
-Create a `.env` file in the root:
+Create a `.env` file in the project root:
 
 ```env
-# OpenRouter (LLM + Embeddings)
-OPENROUTER_API_KEY=your_openrouter_api_key
+# PostgreSQL connection (use one of the two options below)
+POSTGRES_URL=postgresql://user:password@host:5432/dbname
 
-# PostgreSQL connection
-# Option A: Connection string (recommended for Vercel/Neon/Supabase)
-POSTGRES_URL=postgresql://user:password@host:5432/dbname?sslmode=require
-
-# Option B: Individual fields
+# — OR — individual fields:
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
-DB_PASSWORD=your_password
-DB_NAME=github_analyzer
+DB_PASSWORD=yourpassword
+DB_NAME=repo_analyzer
+
+# AI providers
+OPENROUTER_API_KEY=your_openrouter_api_key
+GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key
+
+# Optional: GitHub token to avoid rate limiting on the GitHub API
+GITHUB_TOKEN=your_github_personal_access_token
 ```
 
-### 4. Set up the database
+### 3. Enable pgvector
 
-The app auto-creates tables on first run. You only need to ensure the `pgvector` extension is available:
+Run this once in your PostgreSQL database:
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
-### 5. Run the development server
+> The application will automatically create the required tables on the first analysis run.
+
+### 4. Run the development server
 
 ```bash
 npm run dev
@@ -152,125 +246,29 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 📂 Project Structure
+## Usage
 
-```
-src/
-├── app/
-│   ├── (actions)/                           # Next.js Server Actions
-│   │   ├── github-analysis.ts               # Main repo analysis orchestrator
-│   │   ├── repo-questions-rag.ts            # Ask Q&A server action
-│   │   ├── repo-semantic-find-questions.rag.ts  # Semantic search action
-│   │   ├── store-repo-data.ts               # DB persistence actions
-│   │   └── get-analysis.ts                  # Fetch stored analysis
-│   ├── mcp/
-│   │   ├── index.ts                         # MCP tool definitions (registerMcpTools)
-│   │   ├── connect-mcp.ts                   # MCP client factory (fresh instance per request)
-│   │   ├── ai-prompt.ts                     # Shared LLM prompt builder
-│   │   └── call-github-repo.ts              # GitHub API fetcher
-│   ├── lib/
-│   │   ├── models/analysis.ts               # PostgreSQL schema + queries
-│   │   ├── openrouter/                      # LLM + embeddings client
-│   │   └── rag/
-│   │       ├── vector-store.ts              # Chunks + embeds repo content
-│   │       ├── embeddings.ts                # Batch embedding helper
-│   │       └── retrievalRag/
-│   │           ├── askRagRepoQuestionRetriever.ts  # RAG retrieval pipeline
-│   │           ├── hybridSearchQueries.ts          # pgvector + full-text SQL
-│   │           └── combineHybridSearch.ts          # Dedup + merge results
-│   └── askRepoQuestions/
-│       └── page.tsx                         # Ask Repository chat page
-├── components/
-│   ├── AnalyzeSearchInput.tsx               # URL input form
-│   └── HomePage/
-│       ├── SemanticSearch.tsx               # Semantic search panel
-│       ├── FileExplorer.tsx                 # Repository tree viewer
-│       ├── GithubRepoOverview.tsx           # Header overview card
-│       ├── RepositoryInsights.tsx           # Stats + donut chart
-│       ├── RepositoryGeneralOverview.tsx    # Package dependency table
-│       ├── TechStack.tsx                    # Tech stack detection
-│       └── RecentAnalysis.tsx              # Previously analyzed repos
+1. **Enter a GitHub URL** in the search bar at the top (e.g. `https://github.com/facebook/react`).
+2. **Wait for analysis** — the dashboard fetches README, file tree, package.json, stats, and languages in parallel and generates AI summaries. This typically takes 10–30 seconds.
+3. **Explore the dashboard** — review the overview, file explorer, tech stack, and repository insights panels.
+4. **Ask questions** — use the "Ask AI" panel to ask anything about the codebase in plain English.
+5. **Semantic search** — use the search panel to find specific content by meaning, not just keywords.
+6. **Browse history** — previously analyzed repositories are stored in the database and accessible from the sidebar.
+
+---
+
+## Deployment
+
+This project is configured for [Vercel](https://vercel.com/) deployment (`vercel.json` is included).
+
+```bash
+npm run build
 ```
 
----
-
-## 🔄 How the RAG Pipeline Works
-
-```
-User Query
-    │
-    ▼
-openrouterEmbeddings(query)  →  1536-dim vector
-    │
-    ├── Vector Search (pgvector cosine similarity, LIMIT 3)
-    │       Scoped to latest repo_url
-    │
-    └── Full-text Search (PostgreSQL tsvector, LIMIT 3)
-            Scoped to latest repo_url
-                │
-                ▼
-        combineHybridSearch()  →  Dedup by chunk ID
-                │
-                ▼
-        Top chunks joined as context (max 3,000 chars)
-                │
-                ▼
-        GPT-4o-mini answers the question
-        (max_tokens: 1024, temperature: 0.3)
-```
-
-### What Gets Embedded
-
-When you analyze a repo, three sources are chunked and embedded into pgvector:
-
-| Source | Why |
-|--------|-----|
-| `README.md` (AI summary) | Project overview, setup instructions |
-| **File Tree** (AI analysis) | Folder structure, file names, directory purposes |
-| **package.json** (AI analysis) | Dependencies, scripts, framework detection |
+Set all environment variables from the `.env` section above in your Vercel project settings. Make sure your PostgreSQL database is accessible from Vercel's serverless functions (e.g., via [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Railway](https://railway.app)).
 
 ---
 
-## ⚙️ Environment Variables Reference
+## License
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `OPENROUTER_API_KEY` | ✅ | OpenRouter API key for LLM + embeddings |
-| `POSTGRES_URL` | ✅* | Full PostgreSQL connection string |
-| `DB_HOST` | ✅* | Database host (if not using `POSTGRES_URL`) |
-| `DB_PORT` | | Database port (default: 5432) |
-| `DB_USER` | ✅* | Database user |
-| `DB_PASSWORD` | ✅* | Database password |
-| `DB_NAME` | ✅* | Database name |
-
-*Either `POSTGRES_URL` or the individual `DB_*` variables are required.
-
----
-
-## 🚢 Deployment
-
-This project is deployed on **Vercel** with a **Neon** (or any PostgreSQL provider with pgvector) database.
-
-### Vercel Deployment
-
-1. Push to GitHub
-2. Import project in [Vercel](https://vercel.com)
-3. Add all environment variables in Vercel project settings
-4. Deploy
-
-> **Note:** The MCP server uses `InMemoryTransport` — it runs fully in-process within Next.js server actions, so no separate server process is needed.
-
----
-
-## 📝 License
-
-MIT © [Pursharth Zutshi](https://github.com/Pursharthzutshi)
-
----
-
-## 🙏 Acknowledgements
-
-- [OpenRouter](https://openrouter.ai) for unified LLM API access
-- [pgvector](https://github.com/pgvector/pgvector) for vector similarity search in PostgreSQL
-- [Model Context Protocol](https://modelcontextprotocol.io) for the AI tool orchestration layer
-- [LangChain Text Splitters](https://js.langchain.com/docs/modules/data_connection/document_transformers/) for markdown-aware chunking
+MIT

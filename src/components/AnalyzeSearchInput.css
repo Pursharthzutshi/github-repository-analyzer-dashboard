@@ -1,8 +1,17 @@
+.search-wrapper-outer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
 .search-wrapper {
     width: 100%;
     display: flex;
     justify-content: center;
-    margin-bottom: 1rem;
 }
 
 .search-container {
@@ -102,3 +111,96 @@
     animation: spin 1s linear infinite;
 }
 
+/* Error state for search container */
+.search-container--error {
+    border-color: rgba(239, 68, 68, 0.6) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12), var(--shadow-sm) !important;
+}
+
+.search-container--error .search-icon {
+    color: rgba(239, 68, 68, 0.8);
+}
+
+/* Error Toast */
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toastSlideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.97);
+    }
+}
+
+.url-error-toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(30, 10, 10, 0.85);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #fca5a5;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    max-width: 800px;
+    width: 100%;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 24px rgba(239, 68, 68, 0.15);
+    margin-top: 10px;
+
+    /* Hidden by default */
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.97);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.url-error-toast--visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+    animation: toastSlideIn 0.25s ease forwards;
+}
+
+.url-error-toast__icon {
+    flex-shrink: 0;
+    color: #f87171;
+}
+
+.url-error-toast__text {
+    flex: 1;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.url-error-toast__close {
+    background: none;
+    border: none;
+    color: #f87171;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+}
+
+.url-error-toast__close:hover {
+    opacity: 1;
+}
