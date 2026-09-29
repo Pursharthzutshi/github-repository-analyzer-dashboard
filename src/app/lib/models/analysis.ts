@@ -80,6 +80,15 @@ export async function getAllAnalysis() {
     return result.rows;
 }
 
+export async function getAllDetailedAnalysis() {
+    const result = await pool.query(`
+        SELECT *
+        FROM github_repo_analysis_data
+        ORDER BY analyzed_at DESC;
+    `);
+    return result.rows;
+}
+
 export async function getLatestAnalysis() {
     const result = await pool.query(`
         SELECT *

@@ -1,4 +1,4 @@
-import React from 'react';
+import { getAllDetailedAnalysis } from '../lib/models/analysis';
 import { 
     Activity, 
     Users, 
@@ -7,11 +7,37 @@ import {
     TrendingUp, 
     Clock, 
     Code2,
-    GitPullRequest
+    GitPullRequest,
+    FolderGit2
 } from 'lucide-react';
 import './Analytics.css';
 
-export default function AnalyticsPage() {
+export default async function AnalyticsPage() {
+    const data = await getAllDetailedAnalysis();
+    const totalRepos = data.length;
+    
+    // Sort by most recent
+    const sortedData = [...data].sort((a, b) => new Date(b.analyzed_at).getTime() - new Date(a.analyzed_at).getTime());
+    const recentActivity = sortedData.slice(0, 5).map(repo => {
+        // Try to extract a repo name from the URL
+        let repoName = repo.repo_url;
+        try {
+            const urlParts = new URL(repo.repo_url).pathname.split('/').filter(Boolean);
+            if (urlParts.length >= 2) {
+                repoName = `${urlParts[urlParts.length - 2]}/${urlParts[urlParts.length - 1]}`;
+            }
+        } catch (e) {
+            // Ignore invalid URL
+        }
+
+        return {
+            repo: repoName,
+            status: "Completed",
+            time: new Date(repo.analyzed_at).toLocaleDateString(),
+            metric: "Analysis complete"
+        };
+    });
+
     return (
         <div className="analytics-container">
             <div className="analytics-header">
@@ -27,10 +53,10 @@ export default function AnalyticsPage() {
                     </div>
                     <div className="stat-info">
                         <h3>Total Repos Analyzed</h3>
-                        <div className="stat-value">24</div>
+                        <div className="stat-value">{totalRepos}</div>
                         <div className="stat-trend positive">
                             <TrendingUp size={14} />
-                            <span>+3 this week</span>
+                            <span>Up to date</span>
                         </div>
                     </div>
                 </div>
@@ -221,11 +247,7 @@ export default function AnalyticsPage() {
                     </div>
                 </div>
                 <div className="activity-list">
-                    {[
-                        { repo: "facebook/react", status: "Completed", time: "2 hours ago", metric: "198k stars" },
-                        { repo: "vercel/next.js", status: "Completed", time: "5 hours ago", metric: "112k stars" },
-                        { repo: "tailwindlabs/tailwindcss", status: "Completed", time: "1 day ago", metric: "74k stars" },
-                    ].map((item, idx) => (
+                    {recentActivity.map((item, idx) => (
                         <div key={idx} className="activity-row">
                             <div className="activity-repo">
                                 <FolderGit2 size={18} className="activity-repo-icon" />
@@ -236,11 +258,13 @@ export default function AnalyticsPage() {
                             <div className="activity-time">{item.time}</div>
                         </div>
                     ))}
+                    {recentActivity.length === 0 && (
+                        <div className="activity-row">
+                            <div className="activity-repo">No recent activity</div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
     );
 }
-
-// Just importing an extra icon needed locally in the file since we used it in the map
-import { FolderGit2 } from 'lucide-react';
