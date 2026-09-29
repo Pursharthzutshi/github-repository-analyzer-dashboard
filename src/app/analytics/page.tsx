@@ -237,37 +237,7 @@ export default async function AnalyticsPage() {
                     </div>
                 </div>
 
-                {/* Most Active Contributors (Mockup) */}
-                <div className="chart-card">
-                    <div className="chart-header">
-                        <div className="chart-title">
-                            <Users size={20} className="chart-icon" />
-                            <h2>Top Contributors Across Repos</h2>
-                        </div>
-                    </div>
-                    <div className="chart-content contributor-list">
-                        {[
-                            { name: "Sarah Drasner", commits: 1432, repos: 3 },
-                            { name: "Dan Abramov", commits: 984, repos: 2 },
-                            { name: "Guillermo Rauch", commits: 845, repos: 4 },
-                            { name: "Lee Robinson", commits: 620, repos: 3 },
-                        ].map((user, idx) => (
-                            <div key={idx} className="contributor-item">
-                                <div className="contributor-avatar">
-                                    {user.name.charAt(0)}
-                                </div>
-                                <div className="contributor-details">
-                                    <h4>{user.name}</h4>
-                                    <p>Active in {user.repos} repos</p>
-                                </div>
-                                <div className="contributor-stats">
-                                    <span className="commit-count">{user.commits}</span>
-                                    <span className="commit-label">commits</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+
             </div>
 
             {/* Recent Activity List */}
