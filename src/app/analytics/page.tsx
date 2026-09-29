@@ -12,13 +12,52 @@ import {
 } from 'lucide-react';
 import './Analytics.css';
 
+// Helper to fetch repo details from Github API with caching
+async function fetchGithubRepoData(repoName: string) {
+    try {
+        const headers: any = {};
+        if (process.env.GITHUB_TOKEN) {
+            headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
+        }
+        
+        const [repoRes, langsRes] = await Promise.all([
+            fetch(`https://api.github.com/repos/${repoName}`, { headers, next: { revalidate: 3600 } }),
+            fetch(`https://api.github.com/repos/${repoName}/languages`, { headers, next: { revalidate: 3600 } })
+        ]);
+
+        if (!repoRes.ok || !langsRes.ok) return null;
+        
+        const repoData = await repoRes.json();
+        const langsData = await langsRes.json();
+        
+        return {
+            stars: repoData.stargazers_count || 0,
+            forks: repoData.forks_count || 0,
+            languages: langsData
+        };
+    } catch (e) {
+        return null;
+    }
+}
+
+function formatNumber(num: number): string {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return num.toString();
+}
+
 export default async function AnalyticsPage() {
     const data = await getAllDetailedAnalysis();
     const totalRepos = data.length;
     
     // Sort by most recent
     const sortedData = [...data].sort((a, b) => new Date(b.analyzed_at).getTime() - new Date(a.analyzed_at).getTime());
-    const recentActivity = sortedData.slice(0, 5).map(repo => {
+    
+    let totalStars = 0;
+    let totalForks = 0;
+    const languageCounts: Record<string, number> = {};
+
+    const recentActivity = await Promise.all(sortedData.slice(0, 20).map(async (repo) => {
         // Try to extract a repo name from the URL
         let repoName = repo.repo_url;
         try {
@@ -30,13 +69,36 @@ export default async function AnalyticsPage() {
             // Ignore invalid URL
         }
 
+        const stats = await fetchGithubRepoData(repoName);
+        if (stats) {
+            totalStars += stats.stars;
+            totalForks += stats.forks;
+            
+            // Aggregate languages
+            Object.entries(stats.languages).forEach(([lang, bytes]) => {
+                languageCounts[lang] = (languageCounts[lang] || 0) + (bytes as number);
+            });
+        }
+
         return {
             repo: repoName,
             status: "Completed",
             time: new Date(repo.analyzed_at).toLocaleDateString(),
-            metric: "Analysis complete"
+            metric: stats ? `${formatNumber(stats.stars)} stars` : "Analysis complete"
         };
-    });
+    }));
+
+    // Calculate Top Languages
+    const totalLanguageBytes = Object.values(languageCounts).reduce((a, b) => a + b, 0);
+    const topLanguages = Object.entries(languageCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([name, bytes]) => ({
+            name,
+            percentage: totalLanguageBytes > 0 ? Math.round((bytes / totalLanguageBytes) * 100) : 0,
+            className: name.toLowerCase().replace(/[^a-z0-9]/g, '')
+        }));
+
 
     return (
         <div className="analytics-container">
@@ -67,7 +129,7 @@ export default async function AnalyticsPage() {
                     </div>
                     <div className="stat-info">
                         <h3>Total Stars Tracked</h3>
-                        <div className="stat-value">145.2k</div>
+                        <div className="stat-value">{formatNumber(totalStars)}</div>
                         <div className="stat-trend">
                             <span>Across all repos</span>
                         </div>
@@ -80,7 +142,7 @@ export default async function AnalyticsPage() {
                     </div>
                     <div className="stat-info">
                         <h3>Total Forks Tracked</h3>
-                        <div className="stat-value">28.4k</div>
+                        <div className="stat-value">{formatNumber(totalForks)}</div>
                         <div className="stat-trend">
                             <span>Across all repos</span>
                         </div>
@@ -103,7 +165,7 @@ export default async function AnalyticsPage() {
             </div>
 
             <div className="charts-grid">
-                {/* Languages Chart (Mockup) */}
+                {/* Languages Chart */}
                 <div className="chart-card">
                     <div className="chart-header">
                         <div className="chart-title">
@@ -112,51 +174,21 @@ export default async function AnalyticsPage() {
                         </div>
                     </div>
                     <div className="chart-content language-distribution">
-                        <div className="lang-bar">
-                            <div className="lang-info">
-                                <span className="lang-name">TypeScript</span>
-                                <span className="lang-pct">45%</span>
+                        {topLanguages.length > 0 ? topLanguages.map((lang, idx) => (
+                            <div key={idx} className="lang-bar">
+                                <div className="lang-info">
+                                    <span className="lang-name">{lang.name}</span>
+                                    <span className="lang-pct">{lang.percentage}%</span>
+                                </div>
+                                <div className="progress-track">
+                                    <div className="progress-fill" style={{ width: `${lang.percentage}%`, backgroundColor: `hsl(${idx * 60 + 200}, 70%, 50%)` }}></div>
+                                </div>
                             </div>
-                            <div className="progress-track">
-                                <div className="progress-fill ts" style={{ width: '45%' }}></div>
+                        )) : (
+                            <div className="no-data-message">
+                                <p>Not enough language data available yet.</p>
                             </div>
-                        </div>
-                        <div className="lang-bar">
-                            <div className="lang-info">
-                                <span className="lang-name">JavaScript</span>
-                                <span className="lang-pct">25%</span>
-                            </div>
-                            <div className="progress-track">
-                                <div className="progress-fill js" style={{ width: '25%' }}></div>
-                            </div>
-                        </div>
-                        <div className="lang-bar">
-                            <div className="lang-info">
-                                <span className="lang-name">Python</span>
-                                <span className="lang-pct">15%</span>
-                            </div>
-                            <div className="progress-track">
-                                <div className="progress-fill py" style={{ width: '15%' }}></div>
-                            </div>
-                        </div>
-                        <div className="lang-bar">
-                            <div className="lang-info">
-                                <span className="lang-name">Go</span>
-                                <span className="lang-pct">10%</span>
-                            </div>
-                            <div className="progress-track">
-                                <div className="progress-fill go" style={{ width: '10%' }}></div>
-                            </div>
-                        </div>
-                        <div className="lang-bar">
-                            <div className="lang-info">
-                                <span className="lang-name">Other</span>
-                                <span className="lang-pct">5%</span>
-                            </div>
-                            <div className="progress-track">
-                                <div className="progress-fill other" style={{ width: '5%' }}></div>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
@@ -247,7 +279,7 @@ export default async function AnalyticsPage() {
                     </div>
                 </div>
                 <div className="activity-list">
-                    {recentActivity.map((item, idx) => (
+                    {recentActivity.slice(0, 5).map((item, idx) => (
                         <div key={idx} className="activity-row">
                             <div className="activity-repo">
                                 <FolderGit2 size={18} className="activity-repo-icon" />
